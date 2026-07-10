@@ -7,7 +7,7 @@ client_id = "2ad64215ed6185b023036c1931c8d7a8"
 # automatically (see automatically_update_urls_on_dev below), and
 # `shopify app deploy` / `shopify app config link` sets your real production URL.
 # Set your production host here (and in redirect_urls) before submitting.
-application_url = "https://shipboost.example"
+application_url = "https://shipboost.onrender.com"
 embedded = true
 name = "ShipBoost"
 
@@ -40,8 +40,7 @@ api_version = "2025-10"
 
 [auth]
 # OAuth callback for authPathPrefix "/auth" (app/shopify.server.ts).
-redirect_urls = [ "https://shipboost.example/auth/callback" ]
+redirect_urls = [ "https://shipboost.onrender.com/auth/callback" ]
 
 [build]
-include_config_on_deploy = true
 automatically_update_urls_on_dev = true
