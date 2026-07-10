@@ -15,8 +15,8 @@ database.sqlite
 
 .env
 .env.*
-
-
+# Keep the committed template that documents required variables.
+!.env.example
 
 
 

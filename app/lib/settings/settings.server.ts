@@ -1,0 +1,106 @@
+import type { ShipBoostSetting } from "@prisma/client";
+
+import prisma from "../../db.server";
+import { DEFAULT_SETTINGS } from "./defaults";
+import { DEFAULT_TEMPLATE, isTemplateStyle } from "./templates";
+import {
+  DEFAULT_FONT_FAMILY,
+  DEFAULT_FONT_WEIGHT,
+  DEFAULT_TEXT_ALIGN,
+  isFontFamily,
+  isFontWeight,
+  isTextAlign,
+} from "./typography";
+import {
+  DEFAULT_DISPLAY_ON,
+  DEFAULT_POSITION,
+  isDisplayOn,
+  isPosition,
+} from "./placement";
+import type { CurrencyCode, ShipBoostSettings } from "./types";
+
+/**
+ * Map a persisted Prisma row to the UI-facing `ShipBoostSettings` shape.
+ * The database stores `currencyCode` as a plain string; we narrow it back to
+ * the `CurrencyCode` union for the rest of the app.
+ */
+function toSettings(record: ShipBoostSetting): ShipBoostSettings {
+  return {
+    enabled: record.enabled,
+    template: isTemplateStyle(record.template)
+      ? record.template
+      : DEFAULT_TEMPLATE,
+    goalAmount: record.goalAmount,
+    currencyCode: record.currencyCode as CurrencyCode,
+    barColor: record.barColor,
+    backgroundColor: record.backgroundColor,
+    successColor: record.successColor,
+    remainingMessage: record.remainingMessage,
+    successMessage: record.successMessage,
+    borderRadius: record.borderRadius,
+    barHeight: record.barHeight,
+    fontFamily: isFontFamily(record.fontFamily)
+      ? record.fontFamily
+      : DEFAULT_FONT_FAMILY,
+    fontSize: record.fontSize,
+    fontWeight: isFontWeight(record.fontWeight)
+      ? record.fontWeight
+      : DEFAULT_FONT_WEIGHT,
+    textColor: record.textColor,
+    textAlign: isTextAlign(record.textAlign)
+      ? record.textAlign
+      : DEFAULT_TEXT_ALIGN,
+    displayOn: isDisplayOn(record.displayOn)
+      ? record.displayOn
+      : DEFAULT_DISPLAY_ON,
+    position: isPosition(record.position) ? record.position : DEFAULT_POSITION,
+    enableMobile: record.enableMobile,
+    enableDesktop: record.enableDesktop,
+  };
+}
+
+/**
+ * Load a shop's settings, creating a default record on first access.
+ * This guarantees every installed shop always has exactly one settings row.
+ */
+export async function getSettings(shop: string): Promise<ShipBoostSettings> {
+  const existing = await prisma.shipBoostSetting.findUnique({ where: { shop } });
+  if (existing) {
+    return toSettings(existing);
+  }
+
+  const created = await prisma.shipBoostSetting.create({
+    data: { shop, ...DEFAULT_SETTINGS },
+  });
+  return toSettings(created);
+}
+
+/**
+ * Persist a shop's settings. Uses an upsert so a save always succeeds whether
+ * or not the row already exists.
+ */
+export async function saveSettings(
+  shop: string,
+  settings: ShipBoostSettings,
+): Promise<ShipBoostSettings> {
+  const record = await prisma.shipBoostSetting.upsert({
+    where: { shop },
+    update: settings,
+    create: { shop, ...settings },
+  });
+  return toSettings(record);
+}
+
+/**
+ * Read-only: the "last updated" timestamp for a shop's settings, or `null`
+ * if no record exists yet. Used to show "Last saved" on the dashboard.
+ */
+export async function getSettingsUpdatedAt(
+  shop: string,
+): Promise<string | null> {
+  const record = await prisma.shipBoostSetting.findUnique({
+    where: { shop },
+    select: { updatedAt: true },
+  });
+  return record ? record.updatedAt.toISOString() : null;
+}

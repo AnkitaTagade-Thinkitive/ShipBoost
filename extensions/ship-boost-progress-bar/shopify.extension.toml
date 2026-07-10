@@ -1,0 +1,7 @@
+# Theme App Extension for ShipBoost.
+# This is auto-detected by the Shopify CLI from the `extensions/` folder and is
+# fully isolated from the embedded admin app — it ships Liquid/CSS assets that
+# merchants add to their storefront theme through the Theme Editor.
+name = "ship-boost-progress-bar"
+type = "theme"
+uid = "866b8647-fbda-09b9-3c9a-a9e2c3203f5df7eb308d"

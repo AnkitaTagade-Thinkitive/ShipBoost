@@ -1,0 +1,8 @@
+{
+  "shipboost": {
+    "progress_bar": {
+      "title": "ShipBoost Progress Bar",
+      "subtitle": "Progress bar will render here."
+    }
+  }
+}

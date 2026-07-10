@@ -1,3 +1,13 @@
 .cache
 build
 node_modules
+
+# Never copy secrets or local dev artifacts into the production image.
+.env
+.env.*
+prisma/dev.sqlite
+prisma/dev.sqlite-journal
+database.sqlite
+.git
+.shopify
+.react-router

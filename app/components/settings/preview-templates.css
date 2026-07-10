@@ -1,0 +1,313 @@
+/* SYNC: This is an exact mirror of the storefront stylesheet
+   extensions/ship-boost-progress-bar/assets/ship-boost-progress-bar.css,
+   used by the admin Live Preview so it renders identically to the storefront
+   (WYSIWYG). Kept in `app/` so the Settings route never imports across Vite's
+   server.fs.allow boundary. If you change the extension stylesheet, update this
+   file to match. */
+
+/* ============================================================================
+   ShipBoost — Free Shipping Progress Bar
+
+   Structure:
+     1. Base            shared layout + behaviour (all templates build on this)
+     2. Templates       .shipboost--{modern|glass|gradient|minimal|luxury|neon}
+     3. Keyframes       animations used by templates
+     4. Reduced motion  disables animation for accessibility / performance
+
+   Colours, radius and height come from CSS custom properties set inline by
+   Liquid from the merchant's settings (--sb-bar, --sb-bg, --sb-success,
+   --sb-radius, --sb-height). Templates only change appearance — the markup,
+   JS, and progress logic are unchanged. Every selector is namespaced under
+   `.shipboost` so nothing leaks into the theme.
+   ============================================================================ */
+
+/* ---- 1. Base --------------------------------------------------------------- */
+.shipboost {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  margin: 0;
+  padding: 12px 16px;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  color: inherit;
+  /* Merchant Text Alignment — set on the wrapper too so the alignment holds
+     even if a theme rule out-specifies `.shipboost__message`. */
+  text-align: var(--sb-text-align, center);
+  /* Merchant Background color fills the whole banner. Templates that paint
+     their own surface override this below. */
+  background: var(--sb-bg, #e8f5e9);
+  /* Merchant Border Radius controls the banner's outer corners on every template. */
+  border-radius: var(--sb-radius, 8px);
+}
+
+.shipboost__message {
+  margin: 0 0 8px 0;
+  padding: 0;
+  /* Typography — merchant-controlled via CSS variables (Typography settings).
+     "theme" font-family resolves to `inherit` in Liquid. */
+  font-family: var(--sb-font-family, inherit);
+  font-size: var(--sb-font-size, inherit);
+  font-weight: var(--sb-font-weight, inherit);
+  color: var(--sb-text-color, inherit);
+  text-align: var(--sb-text-align, center);
+}
+
+.shipboost__track {
+  position: relative;
+  width: 100%;
+  height: var(--sb-height, 12px);
+  /* Neutral translucent inset so the track stays visible on top of the banner
+     background (which now uses --sb-bg). The fill renders over this. */
+  background: rgba(128, 128, 128, 0.25);
+  border-radius: var(--sb-radius, 8px);
+  overflow: hidden;
+}
+
+.shipboost__fill {
+  /* Force display: some themes hide empty elements via `:empty { display: none }`,
+     which would otherwise collapse this (empty) fill div. */
+  display: block !important;
+  width: 0;
+  height: 100%;
+  background: var(--sb-bar, #2e7d32);
+  border-radius: var(--sb-radius, 8px);
+  /* Smooth width transition as the cart total changes. */
+  transition: width 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.shipboost.is-complete .shipboost__fill {
+  background: var(--sb-success, #1b5e20);
+}
+
+/* ---- 2. Templates ---------------------------------------------------------- */
+
+/* 2.1 Modern — clean, rounded, soft shadows, minimal */
+.shipboost--modern {
+  padding: 14px 18px;
+}
+.shipboost--modern .shipboost__track {
+  border-radius: var(--sb-radius, 8px);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+.shipboost--modern .shipboost__fill {
+  border-radius: var(--sb-radius, 8px);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18);
+}
+
+/* 2.2 Glass — glassmorphism, blur, transparent, premium */
+.shipboost--glass {
+  padding: 16px 20px;
+  /* Frosted panel tinted by the merchant background; stays translucent so the
+     glass/blur effect is preserved. Fallback for browsers without color-mix. */
+  background: rgba(255, 255, 255, 0.12);
+  background: color-mix(in srgb, var(--sb-bg, #e8f5e9) 40%, transparent);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: var(--sb-radius, 8px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+}
+.shipboost--glass .shipboost__track {
+  background: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: var(--sb-radius, 8px);
+}
+.shipboost--glass .shipboost__fill {
+  border-radius: var(--sb-radius, 8px);
+  opacity: 0.92;
+}
+
+/* 2.3 Gradient — animated gradient fill, rounded, soft movement */
+.shipboost--gradient .shipboost__track {
+  border-radius: var(--sb-radius, 8px);
+}
+.shipboost--gradient .shipboost__fill {
+  border-radius: var(--sb-radius, 8px);
+  background: linear-gradient(
+    90deg,
+    var(--sb-bar, #2e7d32),
+    color-mix(in srgb, var(--sb-bar, #2e7d32) 55%, #ffffff),
+    var(--sb-bar, #2e7d32)
+  );
+  background-size: 200% 100%;
+  animation: shipboost-gradient-move 3s linear infinite;
+}
+.shipboost--gradient.is-complete .shipboost__fill {
+  background: linear-gradient(
+    90deg,
+    var(--sb-success, #1b5e20),
+    color-mix(in srgb, var(--sb-success, #1b5e20) 55%, #ffffff),
+    var(--sb-success, #1b5e20)
+  );
+  background-size: 200% 100%;
+}
+
+/* 2.4 Minimal — thin line, elegant typography, no shadow */
+.shipboost--minimal {
+  padding: 10px 4px;
+}
+.shipboost--minimal .shipboost__message {
+  /* Identity only — typography comes from the merchant's CSS variables. */
+  letter-spacing: 0.04em;
+  opacity: 0.85;
+}
+.shipboost--minimal .shipboost__track {
+  height: 3px;
+  border-radius: var(--sb-radius, 8px);
+  box-shadow: none;
+}
+.shipboost--minimal .shipboost__fill {
+  border-radius: var(--sb-radius, 8px);
+  box-shadow: none;
+}
+
+/* 2.5 Luxury — dark theme, gold accent, premium typography */
+.shipboost--luxury {
+  padding: 18px 22px;
+  /* Merchant background with a subtle luxe sheen gradient on top (keeps depth);
+     gold border + shadow retain the luxurious identity. */
+  background: var(--sb-bg, #1c1c1e);
+  background: linear-gradient(
+      145deg,
+      rgba(255, 255, 255, 0.06),
+      rgba(0, 0, 0, 0.14)
+    ),
+    var(--sb-bg, #1c1c1e);
+  border: 1px solid rgba(212, 175, 55, 0.35);
+  border-radius: var(--sb-radius, 8px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+}
+.shipboost--luxury .shipboost__message {
+  /* Identity only — typography (incl. colour) comes from merchant variables. */
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.shipboost--luxury .shipboost__track {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(212, 175, 55, 0.2);
+  border-radius: var(--sb-radius, 8px);
+}
+.shipboost--luxury .shipboost__fill {
+  border-radius: var(--sb-radius, 8px);
+  background: linear-gradient(90deg, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c);
+  box-shadow: 0 0 8px rgba(212, 175, 55, 0.5);
+}
+.shipboost--luxury.is-complete .shipboost__fill {
+  background: linear-gradient(90deg, #fcf6ba, #d4af37, #fcf6ba);
+}
+
+/* 2.6 Neon — glow effect, animated fill, modern gaming style */
+.shipboost--neon {
+  padding: 16px 20px;
+  /* Merchant background; the neon glow (border + box-shadow, driven by the bar
+     colour) preserves the neon identity. */
+  background: var(--sb-bg, #0a0a12);
+  border: 1px solid color-mix(in srgb, var(--sb-bar, #39ff14) 50%, transparent);
+  border-radius: var(--sb-radius, 8px);
+  box-shadow: 0 0 12px color-mix(in srgb, var(--sb-bar, #39ff14) 30%, transparent);
+}
+.shipboost--neon .shipboost__message {
+  /* Identity only — the glow uses the bar colour; the text colour and the rest
+     of the typography come from the merchant's CSS variables. */
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-shadow: 0 0 6px var(--sb-bar, #39ff14);
+}
+.shipboost--neon .shipboost__track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: var(--sb-radius, 8px);
+}
+.shipboost--neon .shipboost__fill {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--sb-radius, 8px);
+  box-shadow: 0 0 8px var(--sb-bar, #39ff14), 0 0 16px var(--sb-bar, #39ff14);
+}
+/* Animated shine sweeping across the fill (transform-based = GPU friendly). */
+.shipboost--neon .shipboost__fill::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.5),
+    transparent
+  );
+  transform: translateX(-100%);
+  animation: shipboost-neon-sweep 2s linear infinite;
+}
+.shipboost--neon.is-complete .shipboost__fill {
+  box-shadow: 0 0 10px var(--sb-success, #39ff14),
+    0 0 20px var(--sb-success, #39ff14);
+}
+
+/* ---- 3. Keyframes ---------------------------------------------------------- */
+@keyframes shipboost-gradient-move {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 200% 50%;
+  }
+}
+
+@keyframes shipboost-neon-sweep {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* ---- 4. Reduced motion ----------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .shipboost__fill {
+    transition-duration: 0.01ms;
+  }
+  .shipboost--gradient .shipboost__fill,
+  .shipboost--neon .shipboost__fill::after {
+    animation: none;
+  }
+}
+
+/* ---- 5. Device visibility -------------------------------------------------- */
+/* Applied via classes from the merchant's "Enable on mobile/desktop" settings.
+   The two-class selector outranks the base `.shipboost { display: block }`. */
+@media (max-width: 749px) {
+  .shipboost.sb-hide-mobile {
+    display: none !important;
+  }
+}
+@media (min-width: 750px) {
+  .shipboost.sb-hide-desktop {
+    display: none !important;
+  }
+}
+
+/* ---- 6. Placement sizing & spacing ----------------------------------------- */
+/* Every placed bar is inserted INSIDE its target container (the product info
+   column or the Add to Cart button wrapper), so it fills that container exactly
+   — matching the product content width, inheriting its left/right spacing, and
+   never stretching full-page or overflowing. width/max-width keep it within the
+   container; min-width:0 lets it shrink inside flex/grid columns; horizontal
+   margins are zeroed so it stays flush with the surrounding content. Scoped to
+   [data-position] so the admin preview (no data-position) is unaffected. */
+.shipboost[data-position] {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  margin: 8px 0;
+}
+.shipboost[data-position="above-product-info"],
+.shipboost[data-position="below-product-info"] {
+  margin: 16px 0;
+}
+.shipboost[data-position="above-add-to-cart"] {
+  margin: 12px 0;
+}
+.shipboost[data-position="below-add-to-cart"] {
+  margin: 12px 0 16px;
+}

@@ -1,34 +1,64 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
 
-// Note that some adapters may set a maximum length for the String type by default, please ensure your strings are long
-// enough when changing adapters.
-// See https://www.prisma.io/docs/orm/reference/prisma-schema-reference#string for more information
 datasource db {
-  provider = "sqlite"
-  url      = "file:dev.sqlite"
+  provider = "postgresql"
+  // Runtime connection — the app uses the pooled (PgBouncer) Neon endpoint,
+  // which is efficient for serverless/many short-lived connections.
+  url      = env("DATABASE_URL")
+  // Migrations use a DIRECT (non-pooled) connection. Prisma Migrate relies on
+  // advisory locks that do not work through Neon's pooled endpoint, so
+  // `prisma migrate deploy/dev` must talk to the direct endpoint.
+  directUrl = env("DIRECT_URL")
 }
 
 model Session {
-  id            String    @id
-  shop          String
-  state         String
-  isOnline      Boolean   @default(false)
-  scope         String?
-  expires       DateTime?
-  accessToken   String
-  userId        BigInt?
-  firstName     String?
-  lastName      String?
-  email         String?
-  accountOwner  Boolean   @default(false)
-  locale        String?
-  collaborator  Boolean?  @default(false)
-  emailVerified Boolean?  @default(false)
+  id                  String    @id
+  shop                String
+  state               String
+  isOnline            Boolean   @default(false)
+  scope               String?
+  expires             DateTime?
+  accessToken         String
+  userId              BigInt?
+  firstName           String?
+  lastName            String?
+  email               String?
+  accountOwner        Boolean   @default(false)
+  locale              String?
+  collaborator        Boolean?  @default(false)
+  emailVerified       Boolean?  @default(false)
   refreshToken        String?
   refreshTokenExpires DateTime?
+}
+
+/// One free-shipping progress bar configuration per Shopify shop.
+/// The `shop` column (the shop's myshopify.com domain) is unique, so every
+/// shop has exactly one settings record.
+model ShipBoostSetting {
+  id               String   @id @default(cuid())
+  shop             String   @unique
+  enabled          Boolean  @default(true)
+  template         String   @default("modern")
+  goalAmount       String   @default("50.00")
+  currencyCode     String   @default("USD")
+  barColor         String   @default("#2E7D32")
+  backgroundColor  String   @default("#E8F5E9")
+  successColor     String   @default("#1B5E20")
+  remainingMessage String   @default("Spend {{remaining}} more to unlock FREE SHIPPING.")
+  successMessage   String   @default("🎉 Congratulations! You've unlocked FREE SHIPPING.")
+  borderRadius     Int      @default(8)
+  barHeight        Int      @default(12)
+  fontFamily       String   @default("theme")
+  fontSize         Int      @default(12)
+  fontWeight       Int      @default(500)
+  textColor        String   @default("#444444")
+  textAlign        String   @default("center")
+  displayOn        String   @default("all")
+  position         String   @default("below-add-to-cart")
+  enableMobile     Boolean  @default(true)
+  enableDesktop    Boolean  @default(true)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 }

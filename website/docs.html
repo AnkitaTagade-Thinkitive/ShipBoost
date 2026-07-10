@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Documentation — ShipBoost</title>
+    <meta
+      name="description"
+      content="How to install and configure ShipBoost: adding the theme app block, configuring the free shipping progress bar, placement options, FAQ and troubleshooting."
+    />
+    <meta name="theme-color" content="#2e7d32" />
+    <link rel="canonical" href="[SITE_URL]/docs.html" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="ShipBoost" />
+    <meta property="og:title" content="ShipBoost Documentation" />
+    <meta property="og:url" content="[SITE_URL]/docs.html" />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 44 44'%3E%3Crect width='44' height='44' rx='12' fill='%232e7d32'/%3E%3Cpath d='M12 27l7-7 5 5 7-9' stroke='%23fff' stroke-width='2.6' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+    />
+    <link rel="stylesheet" href="assets/styles.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <header class="site-header">
+      <div class="container header-inner">
+        <a class="brand" href="index.html" aria-label="ShipBoost home">
+          <svg width="30" height="30" viewBox="0 0 44 44" aria-hidden="true">
+            <rect width="44" height="44" rx="12" fill="#2e7d32" />
+            <path d="M12 27l7-7 5 5 7-9" stroke="#fff" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M27 16h5v5" stroke="#fff" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+          <span>ShipBoost</span>
+        </a>
+        <nav class="site-nav" aria-label="Primary">
+          <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="docs.html" aria-current="page">Documentation</a></li>
+            <li><a href="support.html">Support</a></li>
+            <li><a class="btn btn-primary" href="[SHOPIFY_APP_STORE_URL]">Install on Shopify</a></li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <main id="main" class="section">
+      <div class="container">
+        <div class="doc-layout">
+          <!-- Sidebar -->
+          <aside>
+            <nav class="doc-nav" aria-label="Documentation">
+              <h2>On this page</h2>
+              <ul>
+                <li><a href="#installation">Installation</a></li>
+                <li><a href="#app-block">Adding the theme app block</a></li>
+                <li><a href="#configuring">Configuring the bar</a></li>
+                <li><a href="#placement">Placement options</a></li>
+                <li><a href="#faq">FAQ</a></li>
+                <li><a href="#troubleshooting">Troubleshooting</a></li>
+              </ul>
+            </nav>
+          </aside>
+
+          <!-- Content -->
+          <article class="prose">
+            <p class="eyebrow">Documentation</p>
+            <h1>ShipBoost setup guide</h1>
+            <p class="lead">
+              Get your free shipping progress bar live in a few minutes. Everything
+              is managed from the ShipBoost admin and your Shopify theme editor — no
+              theme code required.
+            </p>
+
+            <h2 id="installation">Installation</h2>
+            <ol class="steps">
+              <li>Install ShipBoost from the Shopify App Store and open the app from your Shopify admin.</li>
+              <li>Open <strong>Settings</strong> and set your free shipping goal amount.</li>
+              <li>Choose a template and adjust colors, typography and border radius to match your brand.</li>
+              <li>Set placement and visibility — which pages, the position, and mobile or desktop.</li>
+              <li>Save your settings, then add the app block to your theme (next section).</li>
+            </ol>
+
+            <h2 id="app-block">Adding the theme app block</h2>
+            <p>
+              ShipBoost renders through a Shopify <strong>theme app block</strong>, so
+              it is added visually in your theme editor and never edits your theme code.
+            </p>
+            <ol class="steps">
+              <li>In your Shopify admin, go to <strong>Online Store → Themes</strong> and click <strong>Customize</strong>.</li>
+              <li>Navigate to a product page template (or the page/section where you want the bar).</li>
+              <li>Click <strong>Add block</strong> (or <strong>Add section</strong>) and choose <strong>ShipBoost Progress Bar</strong> under the Apps group.</li>
+              <li>Position the block where you would like it, then click <strong>Save</strong>.</li>
+              <li>Preview your storefront to confirm the bar appears.</li>
+            </ol>
+            <div class="note">
+              Tip: the block must be added on each template where you want the bar to
+              appear. The <strong>Position</strong> setting then fine-tunes exactly where
+              it sits relative to your product content.
+            </div>
+
+            <h2 id="configuring">Configuring the progress bar</h2>
+            <p>All of the following are controlled from the ShipBoost <strong>Settings</strong> page:</p>
+            <h3>General</h3>
+            <ul>
+              <li><strong>Enable progress bar</strong> — the master on/off switch.</li>
+              <li><strong>Free shipping goal</strong> — the cart total that unlocks free shipping.</li>
+              <li><strong>Remaining message</strong> — shown below the goal. Use the <code>{{remaining}}</code> token to insert the amount left to spend.</li>
+              <li><strong>Success message</strong> — shown once the customer qualifies.</li>
+            </ul>
+            <h3>Appearance</h3>
+            <ul>
+              <li><strong>Template style</strong> — Modern, Glass, Gradient, Minimal, Luxury or Neon.</li>
+              <li><strong>Colors</strong> — progress bar, background and success colors.</li>
+              <li><strong>Border radius</strong> and <strong>bar height</strong>.</li>
+            </ul>
+            <h3>Typography</h3>
+            <ul>
+              <li><strong>Font family</strong> — a Google Font, or Theme Default to inherit your store font.</li>
+              <li><strong>Font size</strong>, <strong>weight</strong>, <strong>text color</strong> and <strong>alignment</strong>.</li>
+            </ul>
+            <h3>Placement &amp; visibility</h3>
+            <ul>
+              <li><strong>Display on</strong> — which storefront pages show the bar.</li>
+              <li><strong>Position</strong> — where the bar appears (see below).</li>
+              <li><strong>Enable on mobile / desktop</strong> — device visibility.</li>
+            </ul>
+
+            <h2 id="placement">Placement options</h2>
+            <p>The <strong>Position</strong> setting places the bar relative to standard product-page elements:</p>
+            <ul>
+              <li><strong>Above Product Information</strong> — at the top of the product details column.</li>
+              <li><strong>Below Product Information</strong> — beneath the product details column.</li>
+              <li><strong>Above Add to Cart Button</strong> — directly above the Add to Cart button.</li>
+              <li><strong>Below Add to Cart Button</strong> — directly below the Add to Cart button (highest visibility).</li>
+            </ul>
+            <p>
+              The bar aligns to the same width and spacing as your Add to Cart button.
+              If the chosen spot doesn’t exist in your theme, the bar simply stays where
+              you placed the block — it never breaks your storefront.
+            </p>
+
+            <h2 id="faq">Frequently asked questions</h2>
+            <div class="faq">
+              <details>
+                <summary>Do I need to edit my theme code?</summary>
+                <div class="faq-body">No. ShipBoost is a theme app block added visually in the theme editor. It never modifies your theme files.</div>
+              </details>
+              <details>
+                <summary>Which themes are supported?</summary>
+                <div class="faq-body">Any Shopify Online Store 2.0 theme that supports app blocks, including Dawn and Horizon.</div>
+              </details>
+              <details>
+                <summary>Will it slow down my store?</summary>
+                <div class="faq-body">No. ShipBoost ships a small stylesheet and script, reads the cart from the storefront, and only loads the single Google Font you select (Theme Default loads none).</div>
+              </details>
+              <details>
+                <summary>Does the bar update as customers add items?</summary>
+                <div class="faq-body">Yes. It reads the live cart and re-renders whenever the cart changes, including a success state once the goal is reached.</div>
+              </details>
+              <details>
+                <summary>Can I customize the message?</summary>
+                <div class="faq-body">Yes. Edit both the remaining and success messages in Settings. Use <code>{{remaining}}</code> to insert the amount left to reach free shipping.</div>
+              </details>
+              <details>
+                <summary>Does ShipBoost collect customer data?</summary>
+                <div class="faq-body">No. ShipBoost reads the cart total on the storefront to calculate progress and does not store customer personal data. See our <a href="privacy.html">Privacy Policy</a>.</div>
+              </details>
+            </div>
+
+            <h2 id="troubleshooting">Troubleshooting</h2>
+            <h3>The bar doesn’t appear</h3>
+            <ul>
+              <li>Confirm the progress bar is enabled in Settings.</li>
+              <li>Confirm the ShipBoost block has been added in your theme editor.</li>
+              <li>Check that the page you’re viewing matches your <strong>Display on</strong> setting.</li>
+              <li>Check that the current device (mobile/desktop) is enabled.</li>
+            </ul>
+            <h3>It shows in the wrong place</h3>
+            <ul>
+              <li>Review your <strong>Position</strong> setting.</li>
+              <li>Make sure the block is added on the matching page template.</li>
+            </ul>
+            <h3>The font looks wrong</h3>
+            <ul>
+              <li>Theme Default always uses your store’s font. Re-save Settings to reload the selected font.</li>
+            </ul>
+            <h3>Text is hard to read</h3>
+            <ul>
+              <li>Adjust the <strong>Text color</strong> in Settings — the live preview warns when contrast against your background is low.</li>
+            </ul>
+
+            <div class="note" style="margin-top:2rem">
+              Still stuck? Visit <a href="support.html">Support</a> and we’ll help you get set up.
+            </div>
+          </article>
+        </div>
+      </div>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container">
+        <div class="footer-grid">
+          <div>
+            <span class="brand">
+              <svg width="26" height="26" viewBox="0 0 44 44" aria-hidden="true">
+                <rect width="44" height="44" rx="12" fill="#2e7d32" />
+                <path d="M12 27l7-7 5 5 7-9" stroke="#fff" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+              ShipBoost
+            </span>
+            <p class="footer-tag">The free shipping progress bar that grows average order value for Shopify stores.</p>
+          </div>
+          <nav aria-label="Product">
+            <h2>Product</h2>
+            <ul>
+              <li><a href="index.html">Home</a></li>
+              <li><a href="docs.html">Documentation</a></li>
+              <li><a href="[SHOPIFY_APP_STORE_URL]">Install on Shopify</a></li>
+            </ul>
+          </nav>
+          <nav aria-label="Legal">
+            <h2>Legal</h2>
+            <ul>
+              <li><a href="privacy.html">Privacy Policy</a></li>
+              <li><a href="terms.html">Terms of Service</a></li>
+            </ul>
+          </nav>
+          <nav aria-label="Support">
+            <h2>Support</h2>
+            <ul>
+              <li><a href="support.html">Help &amp; contact</a></li>
+              <li><a href="mailto:[SUPPORT_EMAIL]">[SUPPORT_EMAIL]</a></li>
+            </ul>
+          </nav>
+        </div>
+        <div class="footer-bottom">
+          <p>© 2026 <span class="placeholder">[COMPANY_LEGAL_NAME]</span>. All rights reserved.</p>
+          <p>ShipBoost is not affiliated with or endorsed by Shopify Inc.</p>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

@@ -1,10 +1,18 @@
 import type { LoaderFunctionArgs } from "react-router";
-import { redirect, Form, useLoaderData } from "react-router";
+import { redirect } from "react-router";
 
-import { login } from "../../shopify.server";
-
-import styles from "./styles.module.css";
-
+/**
+ * Root entry point ("/").
+ *
+ * ShipBoost is an embedded Shopify app: merchants always open it from Shopify
+ * Admin, where the URL carries the shop (and host) params. Those are forwarded
+ * straight to the embedded app at /app, whose `authenticate.admin` loader
+ * completes authentication through Shopify's OAuth / token-exchange flow —
+ * rendering the Dashboard when authenticated, or bouncing through Shopify OAuth
+ * when not. A request with no shop context (only reachable by opening the URL
+ * outside Admin) goes to Shopify's OAuth entry at /auth. No login page, no
+ * manual shop-domain entry, and nothing is ever rendered here.
+ */
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const url = new URL(request.url);
 
@@ -12,46 +20,5 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     throw redirect(`/app?${url.searchParams.toString()}`);
   }
 
-  return { showForm: Boolean(login) };
+  throw redirect("/auth");
 };
-
-export default function App() {
-  const { showForm } = useLoaderData<typeof loader>();
-
-  return (
-    <div className={styles.index}>
-      <div className={styles.content}>
-        <h1 className={styles.heading}>A short heading about [your app]</h1>
-        <p className={styles.text}>
-          A tagline about [your app] that describes your value proposition.
-        </p>
-        {showForm && (
-          <Form className={styles.form} method="post" action="/auth/login">
-            <label className={styles.label}>
-              <span>Shop domain</span>
-              <input className={styles.input} type="text" name="shop" />
-              <span>e.g: my-shop-domain.myshopify.com</span>
-            </label>
-            <button className={styles.button} type="submit">
-              Log in
-            </button>
-          </Form>
-        )}
-        <ul className={styles.list}>
-          <li>
-            <strong>Product feature</strong>. Some detail about your feature and
-            its benefit to your customer.
-          </li>
-          <li>
-            <strong>Product feature</strong>. Some detail about your feature and
-            its benefit to your customer.
-          </li>
-          <li>
-            <strong>Product feature</strong>. Some detail about your feature and
-            its benefit to your customer.
-          </li>
-        </ul>
-      </div>
-    </div>
-  );
-}

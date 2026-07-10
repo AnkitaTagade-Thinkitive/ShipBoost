@@ -1,40 +1,25 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
 client_id = "2ad64215ed6185b023036c1931c8d7a8"
-application_url = "https://example.com"
+# The app is not deployed yet, so this is a deliberately non-resolving placeholder
+# (RFC 2606 reserved ".example" TLD — never a real host). URL management is left
+# to the Shopify CLI: `shopify app dev` rewrites this to the tunnel URL
+# automatically (see automatically_update_urls_on_dev below), and
+# `shopify app deploy` / `shopify app config link` sets your real production URL.
+# Set your production host here (and in redirect_urls) before submitting.
+application_url = "https://shipboost.example"
 embedded = true
 name = "ShipBoost"
 
 [access_scopes]
 # Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
-scopes = "write_products,write_metaobjects,write_metaobject_definitions"
-
-[product.metafields.app.demo_info]
-type = "single_line_text_field"
-name = "Demo Source Info"
-description = "Tracks products created by the Shopify app template for development"
-
-  [product.metafields.app.demo_info.access]
-  admin = "merchant_read_write"
-
-[metaobjects.app.example]
-name = "Example"
-description = "An example metaobject definition created by this template"
-
-  [metaobjects.app.example.access]
-  admin = "merchant_read_write"
-
-[metaobjects.app.example.fields.title]
-name = "Title"
-type = "single_line_text_field"
-required = true
-
-[metaobjects.app.example.fields.description]
-name = "Description"
-type = "multi_line_text_field"
+# ShipBoost stores its settings in app-owned metafields (no scope required) and
+# reads the online store theme to show its name/status on the dashboard.
+# read_themes is the only scope used and is required by the themes query.
+scopes = "read_themes"
 
 [webhooks]
-api_version = "2026-10"
+api_version = "2025-10"
 
   [[webhooks.subscriptions]]
   uri = "/webhooks/app/uninstalled"
@@ -44,8 +29,18 @@ api_version = "2026-10"
   uri = "/webhooks/app/scopes_update"
   topics = [ "app/scopes_update" ]
 
+  # Mandatory GDPR/privacy compliance webhooks — required for every public App
+  # Store app. These are NOT regular subscription topics: Shopify configures
+  # them through this dedicated privacy_compliance block (relative paths resolve
+  # against application_url, so they follow the CLI-managed dev/prod URL).
+  [webhooks.privacy_compliance]
+  customer_data_request_url = "/webhooks/customers/data_request"
+  customer_deletion_url = "/webhooks/customers/redact"
+  shop_deletion_url = "/webhooks/shop/redact"
+
 [auth]
-redirect_urls = [ "https://example.com/api/auth" ]
+# OAuth callback for authPathPrefix "/auth" (app/shopify.server.ts).
+redirect_urls = [ "https://shipboost.example/auth/callback" ]
 
 [build]
 include_config_on_deploy = true
