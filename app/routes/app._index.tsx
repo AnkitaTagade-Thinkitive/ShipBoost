@@ -214,6 +214,27 @@ export default function Index() {
         </s-banner>
       ) : null}
 
+      {/* Go-live guidance — shown once settings are ready. The theme block can't
+          be reliably auto-detected, so we always prompt the merchant to add it
+          and verify on their storefront (the real go-live step). */}
+      {ready ? (
+        <s-banner tone="info" heading="Last step: add ShipBoost to your theme">
+          <s-paragraph>
+            Your settings are ready. To show the bar on your storefront, add the
+            ShipBoost block in your theme editor, then preview your store to
+            confirm it’s live.
+          </s-paragraph>
+          <s-stack direction="inline" gap="base">
+            <s-button variant="primary" href={themeEditorUrl} target="_blank">
+              Open Theme Editor
+            </s-button>
+            <s-button href={storeUrl} target="_blank">
+              Preview store
+            </s-button>
+          </s-stack>
+        </s-banner>
+      ) : null}
+
       {/* 1. Hero */}
       <s-section>
         <s-stack direction="block" gap="small">
