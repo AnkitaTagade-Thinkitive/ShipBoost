@@ -3,6 +3,7 @@ import { useFetcher } from "react-router";
 import { useAppBridge } from "@shopify/app-bridge-react";
 
 import type { ShipBoostSettings } from "../../lib/settings/types";
+import { DEFAULT_SETTINGS } from "../../lib/settings/defaults";
 import {
   validateSettings,
   type SettingsErrors,
@@ -92,6 +93,14 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
     setErrors({});
   }, [savedSettings]);
 
+  // Restore factory defaults into the working copy (does not persist until the
+  // merchant saves). The shop's currency is preserved — it's derived from the
+  // store, not a visual default the merchant chose.
+  const handleReset = useCallback(() => {
+    setSettings({ ...DEFAULT_SETTINGS, currencyCode: savedSettings.currencyCode });
+    setErrors({});
+  }, [savedSettings]);
+
   // React to the action result: toast + new baseline on success, errors on fail.
   useEffect(() => {
     const data = fetcher.data;
@@ -104,6 +113,9 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
       shopify.toast.show("Settings saved");
     } else if (data.errors) {
       setErrors(data.errors);
+      shopify.toast.show("Please fix the highlighted fields", {
+        isError: true,
+      });
     }
   }, [fetcher.data, shopify]);
 
@@ -123,6 +135,13 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
           Discard
         </s-button>
       ) : null}
+      <s-button
+        slot="secondary-actions"
+        onClick={handleReset}
+        {...(isSaving ? { disabled: true } : {})}
+      >
+        Reset to defaults
+      </s-button>
 
       <ProgressBarPreview settings={settings} />
 

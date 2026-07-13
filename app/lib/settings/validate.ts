@@ -33,6 +33,7 @@ export const BORDER_RADIUS_MIN = 0;
 export const BORDER_RADIUS_MAX = 50;
 export const BAR_HEIGHT_MIN = 4;
 export const BAR_HEIGHT_MAX = 40;
+export const MESSAGE_MAX_LENGTH = 200;
 
 /**
  * Validate and normalize merchant-supplied settings.
@@ -42,6 +43,7 @@ export const BAR_HEIGHT_MAX = 40;
  * - Border radius must be an integer between 0 and 50 px
  * - Progress bar height must be an integer between 4 and 40 px
  * - Remaining and success messages must not be empty
+ * - Remaining and success messages must be at most 200 characters
  */
 export function validateSettings(input: ShipBoostSettings): ValidationResult {
   const errors: SettingsErrors = {};
@@ -71,10 +73,14 @@ export function validateSettings(input: ShipBoostSettings): ValidationResult {
 
   if (input.remainingMessage.trim() === "") {
     errors.remainingMessage = "Remaining message can't be empty.";
+  } else if (input.remainingMessage.length > MESSAGE_MAX_LENGTH) {
+    errors.remainingMessage = `Remaining message must be ${MESSAGE_MAX_LENGTH} characters or fewer.`;
   }
 
   if (input.successMessage.trim() === "") {
     errors.successMessage = "Success message can't be empty.";
+  } else if (input.successMessage.length > MESSAGE_MAX_LENGTH) {
+    errors.successMessage = `Success message must be ${MESSAGE_MAX_LENGTH} characters or fewer.`;
   }
 
   // Template comes from a fixed dropdown; normalize any unexpected value to the
