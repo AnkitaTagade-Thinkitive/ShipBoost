@@ -156,6 +156,16 @@
   data-page-type="{{ request.page_type }}"
   style="--sb-bar: {{ sb_bar_color }}; --sb-bg: {{ sb_bg_color }}; --sb-success: {{ sb_success_color }}; --sb-radius: {{ sb_radius }}px; --sb-height: {{ sb_height }}px; --sb-font-family: {{ sb_font_family_css }}; --sb-font-size: {{ sb_font_size }}px; --sb-font-weight: {{ sb_font_weight }}; --sb-text-color: {{ sb_text_color }}; --sb-text-align: {{ sb_text_align }};"
 >
+  {%- comment -%}
+    Speed up the Google Font request — ONLY when a custom (non-theme) font is
+    selected, so theme-font stores add no extra connections. The stylesheet
+    itself is injected by the extension JS (data-font-family).
+  {%- endcomment -%}
+  {%- if sb_font_name and sb_font_name != blank -%}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  {%- endif -%}
+
   <p class="shipboost__message" role="status" aria-live="polite">
     {%- if sb_reached -%}
       {{ sb_success_message }}
@@ -171,6 +181,7 @@
     aria-valuemin="0"
     aria-valuemax="{{ sb_goal }}"
     aria-valuenow="{{ sb_total }}"
+    aria-valuetext="{% if sb_reached %}{{ sb_success_message | escape }}{% else %}{{ sb_progress_message | escape }}{% endif %}"
   >
     <div class="shipboost__fill" style="width: {{ sb_percent }}%;"></div>
   </div>

@@ -296,10 +296,11 @@
     } else {
       el.classList.remove("is-complete");
       if (message) {
-        message.textContent = remainingTpl.replace(
-          "{{remaining}}",
-          formatMoney(remaining, currency),
-        );
+        // Replace EVERY {{remaining}} token (the Liquid `replace` filter is
+        // global; keep the live JS update consistent with the server render).
+        message.textContent = remainingTpl
+          .split("{{remaining}}")
+          .join(formatMoney(remaining, currency));
       }
     }
 
@@ -307,6 +308,12 @@
     if (track) {
       track.setAttribute("aria-valuemax", String(goal));
       track.setAttribute("aria-valuenow", String(totalCents));
+      // Announce the human-readable message (currency context) to screen
+      // readers instead of only the computed percentage.
+      track.setAttribute(
+        "aria-valuetext",
+        message ? message.textContent : "",
+      );
     }
   }
 
