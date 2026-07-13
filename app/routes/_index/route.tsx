@@ -16,7 +16,7 @@ import { redirect } from "react-router";
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const url = new URL(request.url);
 
-  if (url.searchParams.get("shop")) {
+  if (url.searchParams.get("shop") || url.searchParams.get("host")) {
     throw redirect(`/app?${url.searchParams.toString()}`);
   }
 
