@@ -2,11 +2,27 @@ import type { ShipBoostSettings } from "./types";
 import { normalizeHexColor } from "./color";
 import { DEFAULT_TEMPLATE, isTemplateStyle } from "./templates";
 import {
+  CUSTOM_WIDTH_MAX,
+  CUSTOM_WIDTH_MIN,
+  DEFAULT_CUSTOM_WIDTH,
   DEFAULT_DISPLAY_ON,
   DEFAULT_POSITION,
+  DEFAULT_STICKY_POSITION,
+  DEFAULT_WIDTH_MODE,
   isDisplayOn,
   isPosition,
+  isStickyPosition,
+  isWidthMode,
 } from "./placement";
+import {
+  DEFAULT_RECOMMENDATION_LAYOUT,
+  DEFAULT_RECOMMENDATION_MAX,
+  DEFAULT_RECOMMENDATION_SOURCE,
+  RECOMMENDATION_MAX_MAX,
+  RECOMMENDATION_MAX_MIN,
+  isRecommendationLayout,
+  isRecommendationSource,
+} from "./recommendations";
 import {
   DEFAULT_FONT_FAMILY,
   DEFAULT_FONT_SIZE,
@@ -117,6 +133,35 @@ export function validateSettings(input: ShipBoostSettings): ValidationResult {
     : DEFAULT_DISPLAY_ON;
   const position = isPosition(input.position) ? input.position : DEFAULT_POSITION;
 
+  // Bar width — mode normalized to its default; custom width clamped to 30–100.
+  const widthMode = isWidthMode(input.widthMode)
+    ? input.widthMode
+    : DEFAULT_WIDTH_MODE;
+  const roundedWidth = Math.round(input.customWidth);
+  const customWidth = Number.isFinite(input.customWidth)
+    ? Math.min(Math.max(roundedWidth, CUSTOM_WIDTH_MIN), CUSTOM_WIDTH_MAX)
+    : DEFAULT_CUSTOM_WIDTH;
+  // Sticky Top only pins page-wide as a top-level block (the "none" / Below
+  // Header position). Force Normal for every other placement so the stored
+  // value matches the actual storefront behaviour and the disabled UI control.
+  const stickyInput = isStickyPosition(input.stickyPosition)
+    ? input.stickyPosition
+    : DEFAULT_STICKY_POSITION;
+  const stickyPosition = position === "none" ? stickyInput : DEFAULT_STICKY_POSITION;
+
+  // Product recommendations — enums normalized to defaults, max clamped 1–4,
+  // free-text IDs trimmed. Booleans pass through.
+  const recommendationSource = isRecommendationSource(input.recommendationSource)
+    ? input.recommendationSource
+    : DEFAULT_RECOMMENDATION_SOURCE;
+  const roundedMax = Math.round(input.recommendationMax);
+  const recommendationMax = Number.isFinite(input.recommendationMax)
+    ? Math.min(Math.max(roundedMax, RECOMMENDATION_MAX_MIN), RECOMMENDATION_MAX_MAX)
+    : DEFAULT_RECOMMENDATION_MAX;
+  const recommendationLayout = isRecommendationLayout(input.recommendationLayout)
+    ? input.recommendationLayout
+    : DEFAULT_RECOMMENDATION_LAYOUT;
+
   return {
     errors: Object.keys(errors).length > 0 ? errors : null,
     value: {
@@ -136,6 +181,14 @@ export function validateSettings(input: ShipBoostSettings): ValidationResult {
       textAlign,
       displayOn,
       position,
+      widthMode,
+      customWidth,
+      stickyPosition,
+      recommendationSource,
+      recommendationMax,
+      recommendationLayout,
+      recommendationCollectionId: input.recommendationCollectionId.trim(),
+      recommendationProductIds: input.recommendationProductIds.trim(),
     },
   };
 }

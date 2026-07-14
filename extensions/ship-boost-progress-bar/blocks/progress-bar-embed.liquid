@@ -1,0 +1,23 @@
+{% comment %}
+  ShipBoost — Free Shipping Progress Bar (app embed).
+
+  Enabled once in Theme Settings → App embeds. Renders site-wide (target: body)
+  so "Display On" (All / Home / Product / Cart / Product+Cart) works on every
+  page without the merchant adding a block to each template. The extension JS
+  then relocates the bar to the chosen Position (or below the header for "None").
+
+  Uses the same shared snippet as the section block, so both render identically.
+  The section block remains available and unchanged for merchants who prefer to
+  place the bar in a specific section — the JS renders only one bar if both exist.
+{% endcomment %}
+{% render 'ship-boost-bar' %}
+
+{% schema %}
+{
+  "name": "ShipBoost Progress Bar",
+  "target": "body",
+  "stylesheet": "ship-boost-progress-bar.css",
+  "javascript": "ship-boost-progress-bar.js",
+  "settings": []
+}
+{% endschema %}

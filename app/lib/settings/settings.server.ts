@@ -12,11 +12,27 @@ import {
   isTextAlign,
 } from "./typography";
 import {
+  CUSTOM_WIDTH_MAX,
+  CUSTOM_WIDTH_MIN,
+  DEFAULT_CUSTOM_WIDTH,
   DEFAULT_DISPLAY_ON,
   DEFAULT_POSITION,
+  DEFAULT_STICKY_POSITION,
+  DEFAULT_WIDTH_MODE,
   isDisplayOn,
   isPosition,
+  isStickyPosition,
+  isWidthMode,
 } from "./placement";
+import {
+  DEFAULT_RECOMMENDATION_LAYOUT,
+  DEFAULT_RECOMMENDATION_MAX,
+  DEFAULT_RECOMMENDATION_SOURCE,
+  RECOMMENDATION_MAX_MAX,
+  RECOMMENDATION_MAX_MIN,
+  isRecommendationLayout,
+  isRecommendationSource,
+} from "./recommendations";
 import type { CurrencyCode, ShipBoostSettings } from "./types";
 
 /**
@@ -56,6 +72,37 @@ function toSettings(record: ShipBoostSetting): ShipBoostSettings {
     position: isPosition(record.position) ? record.position : DEFAULT_POSITION,
     enableMobile: record.enableMobile,
     enableDesktop: record.enableDesktop,
+    widthMode: isWidthMode(record.widthMode)
+      ? record.widthMode
+      : DEFAULT_WIDTH_MODE,
+    customWidth: Number.isFinite(record.customWidth)
+      ? Math.min(Math.max(record.customWidth, CUSTOM_WIDTH_MIN), CUSTOM_WIDTH_MAX)
+      : DEFAULT_CUSTOM_WIDTH,
+    // Sticky Top only applies with the Below Header ("none") position; force
+    // Normal otherwise so loaded settings match the storefront + the UI control.
+    stickyPosition:
+      record.position === "none" && isStickyPosition(record.stickyPosition)
+        ? record.stickyPosition
+        : DEFAULT_STICKY_POSITION,
+    recommendationsEnabled: record.recommendationsEnabled,
+    recommendationSource: isRecommendationSource(record.recommendationSource)
+      ? record.recommendationSource
+      : DEFAULT_RECOMMENDATION_SOURCE,
+    recommendationMax: Number.isFinite(record.recommendationMax)
+      ? Math.min(
+          Math.max(record.recommendationMax, RECOMMENDATION_MAX_MIN),
+          RECOMMENDATION_MAX_MAX,
+        )
+      : DEFAULT_RECOMMENDATION_MAX,
+    recommendationLayout: isRecommendationLayout(record.recommendationLayout)
+      ? record.recommendationLayout
+      : DEFAULT_RECOMMENDATION_LAYOUT,
+    recommendationShowImage: record.recommendationShowImage,
+    recommendationShowPrice: record.recommendationShowPrice,
+    recommendationShowButton: record.recommendationShowButton,
+    recommendationHideAfterGoal: record.recommendationHideAfterGoal,
+    recommendationCollectionId: record.recommendationCollectionId,
+    recommendationProductIds: record.recommendationProductIds,
   };
 }
 

@@ -1,0 +1,266 @@
+{% comment %}
+  ShipBoost — Free Shipping Progress Bar (shared renderer).
+
+  Rendered by BOTH block types so there is a single source of truth:
+    - blocks/progress-bar.liquid       (section app block — merchant places it)
+    - blocks/progress-bar-embed.liquid (app embed — renders site-wide)
+
+  Values come from the merchant's saved settings, published by the app to an
+  app-owned shop metafield ("$app:shipboost" / "settings", JSON). If the
+  metafield is missing or a field is absent, the built-in defaults below are
+  used, so the bar always renders.
+
+  `sb_shopify_attributes` is passed in by the section block (for Theme Editor
+  selection); it is blank for the app embed.
+{% endcomment %}
+
+{%- comment -%} ---- Default configuration (fallback) ---- {%- endcomment -%}
+{%- assign sb_enabled = true -%}
+{%- assign sb_template = 'modern' -%}
+{%- assign sb_goal = 5000 -%}
+{%- assign sb_bar_color = '#2E7D32' -%}
+{%- assign sb_bg_color = '#E8F5E9' -%}
+{%- assign sb_success_color = '#1B5E20' -%}
+{%- assign sb_radius = 8 -%}
+{%- assign sb_height = 12 -%}
+{%- assign sb_font_family = 'theme' -%}
+{%- assign sb_font_size = 12 -%}
+{%- assign sb_font_weight = 500 -%}
+{%- assign sb_text_color = '#444444' -%}
+{%- assign sb_text_align = 'center' -%}
+{%- assign sb_display_on = 'all' -%}
+{%- assign sb_position = 'below-add-to-cart' -%}
+{%- assign sb_width_mode = 'content' -%}
+{%- assign sb_custom_width = 100 -%}
+{%- assign sb_sticky = 'normal' -%}
+{%- assign sb_enable_mobile = true -%}
+{%- assign sb_enable_desktop = true -%}
+{%- assign sb_remaining_message = 'Spend {{remaining}} more to unlock FREE SHIPPING.' -%}
+{%- assign sb_success_message = "🎉 Congratulations! You've unlocked FREE SHIPPING." -%}
+{%- comment -%} Product Recommendations — off by default (unchanged for existing merchants). {%- endcomment -%}
+{%- assign sb_recs_enabled = false -%}
+{%- assign sb_recs_source = 'smart' -%}
+{%- assign sb_recs_max = 3 -%}
+{%- assign sb_recs_layout = 'horizontal' -%}
+{%- assign sb_recs_show_image = true -%}
+{%- assign sb_recs_show_price = true -%}
+{%- assign sb_recs_show_button = true -%}
+{%- assign sb_recs_hide_after_goal = true -%}
+
+{%- comment -%} ---- Merchant settings from the app (app-owned shop metafield) ---- {%- endcomment -%}
+{%- assign sb_settings = shop.metafields["$app:shipboost"].settings.value -%}
+{%- if sb_settings -%}
+  {%- if sb_settings.enabled == false -%}{%- assign sb_enabled = false -%}{%- endif -%}
+  {%- if sb_settings.template -%}{%- assign sb_template = sb_settings.template -%}{%- endif -%}
+  {%- if sb_settings.goalAmount -%}{%- assign sb_goal = sb_settings.goalAmount | times: 100 | round -%}{%- endif -%}
+  {%- if sb_settings.barColor -%}{%- assign sb_bar_color = sb_settings.barColor -%}{%- endif -%}
+  {%- if sb_settings.backgroundColor -%}{%- assign sb_bg_color = sb_settings.backgroundColor -%}{%- endif -%}
+  {%- if sb_settings.successColor -%}{%- assign sb_success_color = sb_settings.successColor -%}{%- endif -%}
+  {%- if sb_settings.borderRadius -%}{%- assign sb_radius = sb_settings.borderRadius -%}{%- endif -%}
+  {%- if sb_settings.barHeight -%}{%- assign sb_height = sb_settings.barHeight -%}{%- endif -%}
+  {%- if sb_settings.fontFamily -%}{%- assign sb_font_family = sb_settings.fontFamily -%}{%- endif -%}
+  {%- if sb_settings.fontSize -%}{%- assign sb_font_size = sb_settings.fontSize -%}{%- endif -%}
+  {%- if sb_settings.fontWeight -%}{%- assign sb_font_weight = sb_settings.fontWeight -%}{%- endif -%}
+  {%- if sb_settings.textColor -%}{%- assign sb_text_color = sb_settings.textColor -%}{%- endif -%}
+  {%- if sb_settings.textAlign -%}{%- assign sb_text_align = sb_settings.textAlign -%}{%- endif -%}
+  {%- if sb_settings.displayOn -%}{%- assign sb_display_on = sb_settings.displayOn -%}{%- endif -%}
+  {%- if sb_settings.position -%}{%- assign sb_position = sb_settings.position -%}{%- endif -%}
+  {%- if sb_settings.widthMode -%}{%- assign sb_width_mode = sb_settings.widthMode -%}{%- endif -%}
+  {%- if sb_settings.customWidth -%}{%- assign sb_custom_width = sb_settings.customWidth -%}{%- endif -%}
+  {%- if sb_settings.stickyPosition -%}{%- assign sb_sticky = sb_settings.stickyPosition -%}{%- endif -%}
+  {%- if sb_settings.enableMobile == false -%}{%- assign sb_enable_mobile = false -%}{%- endif -%}
+  {%- if sb_settings.enableDesktop == false -%}{%- assign sb_enable_desktop = false -%}{%- endif -%}
+  {%- if sb_settings.remainingMessage -%}{%- assign sb_remaining_message = sb_settings.remainingMessage -%}{%- endif -%}
+  {%- if sb_settings.successMessage -%}{%- assign sb_success_message = sb_settings.successMessage -%}{%- endif -%}
+  {%- if sb_settings.recommendationsEnabled == true -%}{%- assign sb_recs_enabled = true -%}{%- endif -%}
+  {%- if sb_settings.recommendationSource -%}{%- assign sb_recs_source = sb_settings.recommendationSource -%}{%- endif -%}
+  {%- if sb_settings.recommendationMax -%}{%- assign sb_recs_max = sb_settings.recommendationMax -%}{%- endif -%}
+  {%- if sb_settings.recommendationLayout -%}{%- assign sb_recs_layout = sb_settings.recommendationLayout -%}{%- endif -%}
+  {%- if sb_settings.recommendationShowImage == false -%}{%- assign sb_recs_show_image = false -%}{%- endif -%}
+  {%- if sb_settings.recommendationShowPrice == false -%}{%- assign sb_recs_show_price = false -%}{%- endif -%}
+  {%- if sb_settings.recommendationShowButton == false -%}{%- assign sb_recs_show_button = false -%}{%- endif -%}
+  {%- if sb_settings.recommendationHideAfterGoal == false -%}{%- assign sb_recs_hide_after_goal = false -%}{%- endif -%}
+{%- endif -%}
+
+{%- comment -%} Compact product list published by the app (separate metafield key). {%- endcomment -%}
+{%- assign sb_recs = shop.metafields["$app:shipboost"].recommendations.value -%}
+{%- assign sb_recs_products = sb_recs.products -%}
+
+{%- comment -%}
+  Backward compatibility: bars saved before the Bar Width feature have no
+  `widthMode` in the metafield. A "Below Header" bar was full-viewport then, so
+  keep it full; every other placement defaults to content (fills its container),
+  matching the pre-feature behaviour. Re-saving settings sets an explicit value.
+{%- endcomment -%}
+{%- if sb_settings.widthMode == blank and sb_position == 'none' -%}
+  {%- assign sb_width_mode = 'full' -%}
+{%- endif -%}
+
+{%- comment -%}
+  Normalize colours to valid CSS. Saved hex values can arrive without a leading
+  "#" (e.g. "2E7D32"); injected as-is, `var(--sb-bar, ...)` becomes invalid and
+  the fill renders transparent. Prepend "#" when it's missing.
+{%- endcomment -%}
+{%- unless sb_bar_color contains '#' -%}{%- assign sb_bar_color = '#' | append: sb_bar_color -%}{%- endunless -%}
+{%- unless sb_bg_color contains '#' -%}{%- assign sb_bg_color = '#' | append: sb_bg_color -%}{%- endunless -%}
+{%- unless sb_success_color contains '#' -%}{%- assign sb_success_color = '#' | append: sb_success_color -%}{%- endunless -%}
+{%- unless sb_text_color contains '#' -%}{%- assign sb_text_color = '#' | append: sb_text_color -%}{%- endunless -%}
+
+{%- comment -%}
+  Map the font-family key to a CSS font-family value with fallbacks. "theme"
+  inherits the store font. Single-quoted names keep the value valid inside the
+  double-quoted inline style attribute. Kept in sync with FONT_FAMILY_STACKS.
+{%- endcomment -%}
+{%- case sb_font_family -%}
+  {%- when 'inter' -%}{%- assign sb_font_family_css = "'Inter', sans-serif" -%}
+  {%- when 'roboto' -%}{%- assign sb_font_family_css = "'Roboto', sans-serif" -%}
+  {%- when 'open-sans' -%}{%- assign sb_font_family_css = "'Open Sans', sans-serif" -%}
+  {%- when 'lato' -%}{%- assign sb_font_family_css = "'Lato', sans-serif" -%}
+  {%- when 'poppins' -%}{%- assign sb_font_family_css = "'Poppins', sans-serif" -%}
+  {%- when 'montserrat' -%}{%- assign sb_font_family_css = "'Montserrat', sans-serif" -%}
+  {%- when 'nunito' -%}{%- assign sb_font_family_css = "'Nunito', sans-serif" -%}
+  {%- when 'work-sans' -%}{%- assign sb_font_family_css = "'Work Sans', sans-serif" -%}
+  {%- when 'dm-sans' -%}{%- assign sb_font_family_css = "'DM Sans', sans-serif" -%}
+  {%- when 'manrope' -%}{%- assign sb_font_family_css = "'Manrope', sans-serif" -%}
+  {%- when 'mulish' -%}{%- assign sb_font_family_css = "'Mulish', sans-serif" -%}
+  {%- when 'rubik' -%}{%- assign sb_font_family_css = "'Rubik', sans-serif" -%}
+  {%- when 'outfit' -%}{%- assign sb_font_family_css = "'Outfit', sans-serif" -%}
+  {%- when 'plus-jakarta-sans' -%}{%- assign sb_font_family_css = "'Plus Jakarta Sans', sans-serif" -%}
+  {%- when 'space-grotesk' -%}{%- assign sb_font_family_css = "'Space Grotesk', sans-serif" -%}
+  {%- when 'figtree' -%}{%- assign sb_font_family_css = "'Figtree', sans-serif" -%}
+  {%- when 'source-sans-pro' -%}{%- assign sb_font_family_css = "'Source Sans Pro', sans-serif" -%}
+  {%- when 'ubuntu' -%}{%- assign sb_font_family_css = "'Ubuntu', sans-serif" -%}
+  {%- when 'noto-sans' -%}{%- assign sb_font_family_css = "'Noto Sans', sans-serif" -%}
+  {%- when 'merriweather' -%}{%- assign sb_font_family_css = "'Merriweather', serif" -%}
+  {%- when 'playfair-display' -%}{%- assign sb_font_family_css = "'Playfair Display', serif" -%}
+  {%- when 'lora' -%}{%- assign sb_font_family_css = "'Lora', serif" -%}
+  {%- when 'libre-baskerville' -%}{%- assign sb_font_family_css = "'Libre Baskerville', serif" -%}
+  {%- when 'cormorant-garamond' -%}{%- assign sb_font_family_css = "'Cormorant Garamond', serif" -%}
+  {%- when 'bebas-neue' -%}{%- assign sb_font_family_css = "'Bebas Neue', sans-serif" -%}
+  {%- when 'oswald' -%}{%- assign sb_font_family_css = "'Oswald', sans-serif" -%}
+  {%- when 'anton' -%}{%- assign sb_font_family_css = "'Anton', sans-serif" -%}
+  {%- when 'raleway' -%}{%- assign sb_font_family_css = "'Raleway', sans-serif" -%}
+  {%- when 'dancing-script' -%}{%- assign sb_font_family_css = "'Dancing Script', cursive" -%}
+  {%- when 'pacifico' -%}{%- assign sb_font_family_css = "'Pacifico', cursive" -%}
+  {%- when 'lobster' -%}{%- assign sb_font_family_css = "'Lobster', cursive" -%}
+  {%- else -%}{%- assign sb_font_family_css = 'inherit' -%}
+{%- endcase -%}
+
+{%- comment -%}
+  Google Font family name for dynamic loading (parsed from the stack, e.g.
+  "'Work Sans', sans-serif" -> "Work Sans"). Blank for Theme Default, so no
+  external font is requested and the store font is inherited.
+{%- endcomment -%}
+{%- assign sb_font_name_parts = sb_font_family_css | split: "'" -%}
+{%- assign sb_font_name = sb_font_name_parts[1] -%}
+
+{%- comment -%} ---- Cart calculations ---- {%- endcomment -%}
+{%- assign sb_total = cart.total_price -%}
+{%- assign sb_remaining = sb_goal | minus: sb_total | at_least: 0 -%}
+{%- assign sb_percent = 0 -%}
+{%- if sb_goal > 0 -%}
+  {%- assign sb_percent = sb_total | times: 100.0 | divided_by: sb_goal | at_most: 100 -%}
+{%- endif -%}
+{%- if sb_total >= sb_goal -%}
+  {%- assign sb_reached = true -%}
+  {%- assign sb_percent = 100 -%}
+{%- else -%}
+  {%- assign sb_reached = false -%}
+{%- endif -%}
+{%- assign sb_remaining_money = sb_remaining | money -%}
+{%- assign sb_progress_message = sb_remaining_message | replace: '{{remaining}}', sb_remaining_money -%}
+
+{%- comment -%}
+  Placement & visibility. Server-side page gate via request.page_type (no JS) so
+  the bar only renders on the selected pages; device visibility is applied with
+  CSS classes. If neither device is enabled, nothing renders.
+{%- endcomment -%}
+{%- assign sb_show_on_page = false -%}
+{%- case sb_display_on -%}
+  {%- when 'home' -%}{%- if request.page_type == 'index' -%}{%- assign sb_show_on_page = true -%}{%- endif -%}
+  {%- when 'product' -%}{%- if request.page_type == 'product' -%}{%- assign sb_show_on_page = true -%}{%- endif -%}
+  {%- when 'cart' -%}{%- if request.page_type == 'cart' -%}{%- assign sb_show_on_page = true -%}{%- endif -%}
+  {%- when 'product-cart' -%}{%- if request.page_type == 'product' or request.page_type == 'cart' -%}{%- assign sb_show_on_page = true -%}{%- endif -%}
+  {%- else -%}{%- assign sb_show_on_page = true -%}
+{%- endcase -%}
+{%- assign sb_any_device = false -%}
+{%- if sb_enable_mobile or sb_enable_desktop -%}{%- assign sb_any_device = true -%}{%- endif -%}
+
+{%- if sb_enabled and sb_show_on_page and sb_any_device -%}
+<div
+  class="shipboost shipboost--{{ sb_template | handleize }} sb-width-{{ sb_width_mode | handleize }}{% if sb_sticky == 'sticky-top' %} sb-sticky-top{% endif %}{% if sb_reached %} is-complete{% endif %}{% unless sb_enable_mobile %} sb-hide-mobile{% endunless %}{% unless sb_enable_desktop %} sb-hide-desktop{% endunless %}"
+  {{ sb_shopify_attributes }}
+  data-goal="{{ sb_goal }}"
+  data-currency="{{ cart.currency.iso_code }}"
+  data-remaining-message="{{ sb_remaining_message | escape }}"
+  data-success-message="{{ sb_success_message | escape }}"
+  data-font-family="{{ sb_font_name | escape }}"
+  data-position="{{ sb_position }}"
+  data-display-on="{{ sb_display_on }}"
+  data-page-type="{{ request.page_type }}"
+  data-width-mode="{{ sb_width_mode }}"
+  style="--sb-bar: {{ sb_bar_color }}; --sb-bg: {{ sb_bg_color }}; --sb-success: {{ sb_success_color }}; --sb-radius: {{ sb_radius }}px; --sb-height: {{ sb_height }}px; --sb-font-family: {{ sb_font_family_css }}; --sb-font-size: {{ sb_font_size }}px; --sb-font-weight: {{ sb_font_weight }}; --sb-text-color: {{ sb_text_color }}; --sb-text-align: {{ sb_text_align }}; --sb-width: {{ sb_custom_width }}%;"
+>
+  {%- comment -%}
+    Speed up the Google Font request — ONLY when a custom (non-theme) font is
+    selected, so theme-font stores add no extra connections. The stylesheet
+    itself is injected by the extension JS (data-font-family).
+  {%- endcomment -%}
+  {%- if sb_font_name and sb_font_name != blank -%}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  {%- endif -%}
+
+  <p class="shipboost__message" role="status" aria-live="polite">
+    {%- if sb_reached -%}
+      {{ sb_success_message }}
+    {%- else -%}
+      {{ sb_progress_message }}
+    {%- endif -%}
+  </p>
+
+  <div
+    class="shipboost__track"
+    role="progressbar"
+    aria-label="Free shipping progress"
+    aria-valuemin="0"
+    aria-valuemax="{{ sb_goal }}"
+    aria-valuenow="{{ sb_total }}"
+    aria-valuetext="{% if sb_reached %}{{ sb_success_message | escape }}{% else %}{{ sb_progress_message | escape }}{% endif %}"
+  >
+    <div class="shipboost__fill" style="width: {{ sb_percent }}%;"></div>
+  </div>
+
+  {%- comment -%}
+    Product Recommendations. Rendered INSIDE the bar wrapper so it inherits the
+    template look, width, device visibility and placement (it moves with the bar
+    when the JS relocates it). Only emitted — and its CSS/JS only requested (lazy
+    load) — when the merchant enabled recommendations AND the app published a
+    product list. Cards are rendered/ranked client-side from the compact list
+    below (image, title, price, add-to-cart), and refreshed on every cart change.
+  {%- endcomment -%}
+  {%- if sb_recs_enabled and sb_recs_products and sb_recs_products.size > 0 -%}
+    {{ 'ship-boost-recommendations.css' | asset_url | stylesheet_tag }}
+    <div
+      class="shipboost__recs{% if sb_reached and sb_recs_hide_after_goal %} sb-recs-hidden{% endif %}"
+      data-shipboost-recs
+      data-source="{{ sb_recs_source }}"
+      data-max="{{ sb_recs_max }}"
+      data-layout="{{ sb_recs_layout | handleize }}"
+      data-show-image="{{ sb_recs_show_image }}"
+      data-show-price="{{ sb_recs_show_price }}"
+      data-show-button="{{ sb_recs_show_button }}"
+      data-hide-after-goal="{{ sb_recs_hide_after_goal }}"
+      data-goal="{{ sb_goal }}"
+      data-currency="{{ cart.currency.iso_code }}"
+      data-cart-total="{{ cart.total_price }}"
+      data-cart-variants="{{ cart.items | map: 'variant_id' | json | escape }}"
+      data-products="{{ sb_recs_products | json | escape }}"
+    >
+      <p class="shipboost__recs-title">Recommended products</p>
+      <div class="shipboost__recs-list" role="list"></div>
+    </div>
+    {{ 'ship-boost-recommendations.js' | asset_url | script_tag }}
+  {%- endif -%}
+</div>
+{%- endif -%}

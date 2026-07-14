@@ -9,6 +9,7 @@ import { boundary } from "@shopify/shopify-app-react-router/server";
 import { authenticate } from "../shopify.server";
 import { getSettings, saveSettings } from "../lib/settings/settings.server";
 import { syncSettingsMetafield } from "../lib/settings/metafield.server";
+import { syncRecommendationsMetafield } from "../lib/recommendations/fetch.server";
 import { validateSettings } from "../lib/settings/validate";
 import type {
   CurrencyCode,
@@ -16,9 +17,13 @@ import type {
   FontFamily,
   FontWeight,
   Position,
+  RecommendationLayout,
+  RecommendationSource,
   ShipBoostSettings,
+  StickyPosition,
   TemplateStyle,
   TextAlign,
+  WidthMode,
 } from "../lib/settings/types";
 import { SettingsForm } from "../components/settings/SettingsForm";
 
@@ -36,7 +41,32 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     console.warn("[ShipBoost] Settings metafield sync (loader) failed:", error);
   }
 
-  return { settings };
+  // Also refresh the recommendation product list on load (parity with the
+  // settings metafield). This self-heals the common case where `read_products`
+  // was granted AFTER the last save, or recommendations were enabled but the
+  // list was never (re)published — opening Settings republishes it. Only fetches
+  // when the feature is enabled, and never blocks the page on failure.
+  if (settings.recommendationsEnabled) {
+    try {
+      await syncRecommendationsMetafield(admin, settings);
+    } catch (error) {
+      console.warn(
+        "[ShipBoost] Recommendations metafield sync (loader) failed:",
+        error,
+      );
+    }
+  }
+
+  // Whether the current access token was granted `read_products`. It is required
+  // to fetch recommendation products; when missing (the scope was added after
+  // install and the merchant hasn't re-authorized), the storefront shows no
+  // cards. Surface this in the UI so the cause is obvious.
+  const hasProductScope = (session.scope ?? "")
+    .split(",")
+    .map((scope) => scope.trim())
+    .includes("read_products");
+
+  return { settings, hasProductScope };
 };
 
 /** Reconstruct a `ShipBoostSettings` object from submitted form data. */
@@ -64,6 +94,31 @@ function parseForm(formData: FormData): ShipBoostSettings {
     ) as Position,
     enableMobile: formData.get("enableMobile") === "true",
     enableDesktop: formData.get("enableDesktop") === "true",
+    widthMode: String(formData.get("widthMode") ?? "full") as WidthMode,
+    customWidth: Number(formData.get("customWidth")),
+    stickyPosition: String(
+      formData.get("stickyPosition") ?? "normal",
+    ) as StickyPosition,
+    recommendationsEnabled: formData.get("recommendationsEnabled") === "true",
+    recommendationSource: String(
+      formData.get("recommendationSource") ?? "smart",
+    ) as RecommendationSource,
+    recommendationMax: Number(formData.get("recommendationMax")),
+    recommendationLayout: String(
+      formData.get("recommendationLayout") ?? "horizontal",
+    ) as RecommendationLayout,
+    recommendationShowImage: formData.get("recommendationShowImage") === "true",
+    recommendationShowPrice: formData.get("recommendationShowPrice") === "true",
+    recommendationShowButton:
+      formData.get("recommendationShowButton") === "true",
+    recommendationHideAfterGoal:
+      formData.get("recommendationHideAfterGoal") === "true",
+    recommendationCollectionId: String(
+      formData.get("recommendationCollectionId") ?? "",
+    ),
+    recommendationProductIds: String(
+      formData.get("recommendationProductIds") ?? "",
+    ),
   };
 }
 
@@ -87,13 +142,30 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     console.warn("[ShipBoost] Settings metafield sync (action) failed:", error);
   }
 
+  // Refresh the published recommendation product list to match the saved
+  // source/selection. Only runs on save (never on the dashboard render path),
+  // and is best-effort so a product-fetch failure never blocks the save.
+  try {
+    await syncRecommendationsMetafield(admin, settings);
+  } catch (error) {
+    console.warn(
+      "[ShipBoost] Recommendations metafield sync (action) failed:",
+      error,
+    );
+  }
+
   return { ok: true as const, settings };
 };
 
 export default function SettingsRoute() {
-  const { settings } = useLoaderData<typeof loader>();
+  const { settings, hasProductScope } = useLoaderData<typeof loader>();
 
-  return <SettingsForm initialSettings={settings} />;
+  return (
+    <SettingsForm
+      initialSettings={settings}
+      hasProductScope={hasProductScope}
+    />
+  );
 }
 
 export const headers: HeadersFunction = (headersArgs) => {

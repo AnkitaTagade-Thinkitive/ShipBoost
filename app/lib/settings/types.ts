@@ -5,11 +5,21 @@
  */
 import type { TemplateStyle } from "./templates";
 import type { FontFamily, FontWeight, TextAlign } from "./typography";
-import type { DisplayOn, Position } from "./placement";
+import type {
+  DisplayOn,
+  Position,
+  WidthMode,
+  StickyPosition,
+} from "./placement";
+import type {
+  RecommendationSource,
+  RecommendationLayout,
+} from "./recommendations";
 
 export type { TemplateStyle };
 export type { FontFamily, FontWeight, TextAlign };
-export type { DisplayOn, Position };
+export type { DisplayOn, Position, WidthMode, StickyPosition };
+export type { RecommendationSource, RecommendationLayout };
 
 /**
  * Currency codes we currently expose in the admin. In a later phase this will
@@ -79,4 +89,45 @@ export interface ShipBoostSettings {
 
   /** Show the bar on desktop viewports. */
   enableDesktop: boolean;
+
+  /** Bar width mode: full width, theme content width, or a custom percentage. */
+  widthMode: WidthMode;
+
+  /** Custom width as a percentage (30–100). Only applied when widthMode is "custom". */
+  customWidth: number;
+
+  /** Sticky behaviour: normal (in-flow) or stuck to the top of the viewport. */
+  stickyPosition: StickyPosition;
+
+  /* ---- Product Recommendations ---- */
+
+  /** Master on/off for showing product recommendations under the bar. */
+  recommendationsEnabled: boolean;
+
+  /** How recommended products are chosen. */
+  recommendationSource: RecommendationSource;
+
+  /** Maximum number of products to show (1–4). */
+  recommendationMax: number;
+
+  /** Card layout for the recommendations. */
+  recommendationLayout: RecommendationLayout;
+
+  /** Show the product image on each card. */
+  recommendationShowImage: boolean;
+
+  /** Show the product price on each card. */
+  recommendationShowPrice: boolean;
+
+  /** Show the Add to cart button on each card. */
+  recommendationShowButton: boolean;
+
+  /** Hide recommendations once the free-shipping goal is reached. */
+  recommendationHideAfterGoal: boolean;
+
+  /** Collection GID for the "collection" source (empty otherwise). */
+  recommendationCollectionId: string;
+
+  /** Comma-separated product GIDs for the "manual" source (empty otherwise). */
+  recommendationProductIds: string;
 }

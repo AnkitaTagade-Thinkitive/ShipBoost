@@ -88,18 +88,15 @@
   //   prepend / append   -> as the first / last child INSIDE the anchor
   // Candidates are tried in order until one matches, so more specific/robust
   // anchors win and looser fallbacks apply only when needed. Covers Dawn and
-  // common Online Store 2.0 themes. All four positions target the product page.
+  // common Online Store 2.0 themes.
   //
-  // All four positions share ONE parent — the Add to Cart button's own wrapper —
-  // so every placement has an identical left edge, right edge, width, padding
-  // and margins. The four positions differ only in WHERE inside that shared
-  // container the bar is inserted:
-  //   - Above Product Information -> first child  (top of the wrapper)
-  //   - Below Product Information -> last child   (bottom of the wrapper)
-  //   - Above Add to Cart Button  -> before the Add to Cart button
-  //   - Below Add to Cart Button  -> after the buttons
-  // Product Info deliberately does NOT use a separate product-info container:
-  // that produced a different width/alignment than the Add to Cart button.
+  // Each placement has its OWN dedicated anchors:
+  //   - Below Header             -> after the site header (site-wide, top-level)
+  //   - Above Add to Cart Button -> before the Add to Cart button
+  //   - Below Add to Cart Button -> after the buttons
+  // The Add to Cart placements fall back to Below Header on pages with no
+  // product form (cart, home, collection). Width and Sticky are independent of
+  // placement — Position alone decides where the bar is inserted.
   var BUTTON_WRAPPER = [".product-form__buttons", ".product-form__cart"];
   var ADD_TO_CART = [
     "[name='add']",
@@ -123,35 +120,39 @@
     return Array.prototype.concat.apply([], arguments);
   }
 
-  // The EXACT container the Add to Cart placements insert into: the Add to Cart
-  // button's own parent (typically `.product-form__buttons`). Product Info
-  // placements reuse this same element so their left/right edges, width, padding
-  // and margins are pixel-identical to the Add to Cart bar — never a separate
-  // product-info wrapper, which aligned differently.
-  function addToCartParent() {
-    var atc = document.querySelector(ADD_TO_CART.join(","));
-    if (atc && atc.parentElement) return atc.parentElement;
-    var wrapper = document.querySelector(BUTTON_WRAPPER.join(","));
-    if (wrapper) return wrapper;
-    return document.querySelector(PRODUCT_FORM.join(","));
-  }
+  // Site header / navigation — anchor for the "Below Header" (none) placement,
+  // which is site-wide (present on every page that has a header). Full Width and
+  // Sticky Top also use it so the bar is a top-level, viewport-wide block.
+  var SITE_HEADER = [
+    "#shopify-section-header",
+    ".shopify-section-header",
+    ".header-wrapper",
+    "sticky-header",
+    ".site-header",
+    "header.header",
+    "header[role='banner']",
+    "header",
+  ];
 
   var POSITION_ANCHORS = {
-    // Reuse the Add to Cart button's parent; only the insertion spot differs.
-    // First child of the shared wrapper (top), above the buttons.
-    "above-product-info": [{ resolve: addToCartParent, where: "prepend" }],
-    // Last child of the shared wrapper (bottom), below the buttons.
-    "below-product-info": [{ resolve: addToCartParent, where: "append" }],
+    // Below Header — immediately below the site header/navigation, as a
+    // top-level block. Site-wide, so it honours Display On on every page.
+    none: rules(SITE_HEADER, "after"),
     // Inside the button wrapper first (width matches the buttons); otherwise
     // directly before the Add to Cart button; the wide form is the last resort.
+    // Final fallback: below the header — so on pages with no product form (cart,
+    // home, collection) the bar still renders prominently instead of at the very
+    // bottom of <body> where the app embed injected it.
     "above-add-to-cart": concat(
       rules(BUTTON_WRAPPER, "prepend"),
       rules(ADD_TO_CART, "before"),
       rules(PRODUCT_FORM, "before"),
+      rules(SITE_HEADER, "after"),
     ),
     "below-add-to-cart": concat(
       rules(BUTTON_WRAPPER, "append"),
       rules(PRODUCT_FORM.concat(["[name='add']"]), "after"),
+      rules(SITE_HEADER, "after"),
     ),
   };
 
@@ -214,6 +215,10 @@
   }
 
   function positionBar(el) {
+    // Position alone determines WHERE the bar is inserted. Width and Sticky are
+    // fully independent: width is applied purely by CSS class (--sb-width /
+    // sb-width-*), and Sticky Top is CSS `position: sticky` at whatever spot this
+    // places the bar. Neither overrides the placement.
     var position = el.getAttribute("data-position");
     var candidates = POSITION_ANCHORS[position];
     if (!candidates) return; // unknown/none — leave where the merchant placed it
@@ -329,6 +334,15 @@
         bars.forEach(function (el) {
           render(el, cart.total_price);
         });
+        // Broadcast the fresh cart so the (optional) recommendations script can
+        // re-rank/re-render without duplicating this fetch + the cart watchers.
+        try {
+          document.dispatchEvent(
+            new CustomEvent("shipboost:cart-updated", { detail: cart }),
+          );
+        } catch (e) {
+          /* CustomEvent unsupported — recs fall back to their own listeners */
+        }
       })
       .catch(function () {
         /* keep the server-rendered state on failure */
@@ -363,6 +377,67 @@
     });
   }
 
+  /* ---- Content width (match the theme's content container) ---------------- */
+  // Well-known content-container selectors across Dawn and other Online Store
+  // 2.0 themes. We match the FIRST one that is actually constrained (narrower
+  // than the viewport, i.e. it has real side margins) so the bar lines up with
+  // the theme's page content instead of stretching almost full-width.
+  var CONTENT_SELECTORS = [
+    ".page-width",
+    ".page-width--narrow",
+    ".container",
+    ".site-width",
+    ".shopify-section .page-width",
+    ".wrapper",
+  ];
+
+  function themeContentWidth(el) {
+    var vw = window.innerWidth || document.documentElement.clientWidth || 0;
+    if (!vw) return 0;
+    for (var i = 0; i < CONTENT_SELECTORS.length; i++) {
+      var nodes = document.querySelectorAll(CONTENT_SELECTORS[i]);
+      for (var j = 0; j < nodes.length; j++) {
+        var node = nodes[j];
+        if (node === el || node.contains(el)) continue;
+        var w = node.getBoundingClientRect().width;
+        // A real content container is narrower than the viewport (has margins).
+        if (w > 0 && w < vw - 1) return Math.round(w);
+      }
+    }
+    return 0;
+  }
+
+  // For "Content Width" mode, size the bar to the theme's content container and
+  // let the CSS keep it centered. Falls back to the CSS max-width if no
+  // container is found. No-op for Full/Custom width.
+  function applyContentWidth(el) {
+    if (!el || el.getAttribute("data-width-mode") !== "content") return;
+    var w = themeContentWidth(el);
+    el.style.maxWidth = w > 0 ? w + "px" : "";
+  }
+
+  // Note: "Full Width" needs NO JS. It is plain width:100% in normal document
+  // flow — its true viewport width comes from the placement (Below Header
+  // re-parents the bar to a top-level block via positionBar, like an
+  // announcement bar). No negative margins / viewport breakout.
+
+  // Re-measure on resize (coalesced to one check per frame) so the bar keeps
+  // matching the theme container as the viewport changes.
+  var resizeScheduled = false;
+  function onResize() {
+    if (resizeScheduled) return;
+    resizeScheduled = true;
+    var run = function () {
+      resizeScheduled = false;
+      applyContentWidth(document.querySelector(".shipboost"));
+    };
+    if (window.requestAnimationFrame) {
+      window.requestAnimationFrame(run);
+    } else {
+      setTimeout(run, 100);
+    }
+  }
+
   /* ---- Init --------------------------------------------------------------- */
   function init() {
     var bars = Array.prototype.slice.call(
@@ -385,6 +460,8 @@
 
     loadFont(bar.getAttribute("data-font-family"));
     positionBar(bar);
+    applyContentWidth(bar);
+    window.addEventListener("resize", onResize);
     watchCartChanges();
     refresh();
   }

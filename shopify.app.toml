@@ -15,8 +15,11 @@ name = "ShipBoost"
 # Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
 # ShipBoost stores its settings in app-owned metafields (no scope required) and
 # reads the online store theme to show its name/status on the dashboard.
-# read_themes is the only scope used and is required by the themes query.
-scopes = "read_themes"
+#   read_themes  — required by the themes query on the dashboard.
+#   read_products — required by the Product Recommendations feature: the app
+#     fetches only the handful of products it needs (best sellers, a chosen
+#     collection, or manual picks) and publishes a compact list to a metafield.
+scopes = "read_themes,read_products"
 
 [webhooks]
 api_version = "2025-10"

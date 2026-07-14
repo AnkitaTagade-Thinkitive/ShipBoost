@@ -59,6 +59,23 @@ model ShipBoostSetting {
   position         String   @default("below-add-to-cart")
   enableMobile     Boolean  @default(true)
   enableDesktop    Boolean  @default(true)
+  widthMode        String   @default("content")
+  customWidth      Int      @default(100)
+  stickyPosition   String   @default("normal")
+
+  // Product Recommendations. Off by default so existing merchants are unchanged
+  // until they opt in.
+  recommendationsEnabled      Boolean @default(false)
+  recommendationSource        String  @default("smart")
+  recommendationMax           Int     @default(3)
+  recommendationLayout        String  @default("horizontal")
+  recommendationShowImage     Boolean @default(true)
+  recommendationShowPrice     Boolean @default(true)
+  recommendationShowButton    Boolean @default(true)
+  recommendationHideAfterGoal Boolean @default(true)
+  recommendationCollectionId  String  @default("")
+  recommendationProductIds    String  @default("")
+
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 }

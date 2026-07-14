@@ -304,3 +304,39 @@
 .shipboost[data-position="below-add-to-cart"] {
   margin: 12px 0 16px;
 }
+/* None (below the site header) — full-width and flush under the header. */
+.shipboost[data-position="none"] {
+  margin: 0;
+}
+
+/* ---- 7. Bar width & sticky ------------------------------------------------- */
+/* Every width mode keeps the bar horizontally centered. `margin-inline: auto`
+   only touches left/right, so it never disturbs the vertical spacing set above.
+   Full Width (default) needs no rule — the base width:100% already applies, so
+   existing merchants are unchanged. */
+.shipboost.sb-width-content,
+.shipboost.sb-width-custom {
+  margin-inline: auto;
+}
+/* Content Width — aligned to the theme content container width. The extension
+   JS measures the theme's actual content container and sets an exact max-width;
+   this rule is the pre-JS/no-JS fallback, preferring the theme's own
+   `--page-width` variable (Dawn and many OS 2.0 themes expose it). */
+.shipboost.sb-width-content {
+  width: 100%;
+  max-width: var(--page-width, var(--sb-content-max, 1200px));
+}
+/* Custom Width — a percentage (30–100%) of the available width, centered. */
+.shipboost.sb-width-custom {
+  width: var(--sb-width, 100%);
+  max-width: 100%;
+}
+
+/* Sticky Top — pin to the top of the viewport while scrolling. `sticky` keeps
+   the bar in normal flow (no layout jump, no flicker); the modest z-index sits
+   above theme content but well below the Shopify admin bar (max z-index). */
+.shipboost.sb-sticky-top {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}

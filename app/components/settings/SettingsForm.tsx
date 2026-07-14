@@ -13,10 +13,13 @@ import { GeneralSettingsCard } from "./GeneralSettingsCard";
 import { AppearanceSettingsCard } from "./AppearanceSettingsCard";
 import { TypographySettingsCard } from "./TypographySettingsCard";
 import { PlacementSettingsCard } from "./PlacementSettingsCard";
+import { RecommendationsSettingsCard } from "./RecommendationsSettingsCard";
 import { ProgressBarPreview } from "./ProgressBarPreview";
 
 interface SettingsFormProps {
   initialSettings: ShipBoostSettings;
+  /** Whether the token has `read_products` (needed to fetch recommendations). */
+  hasProductScope?: boolean;
 }
 
 /** Serialize settings into string form-data values for the action. */
@@ -42,6 +45,19 @@ function toFormValues(settings: ShipBoostSettings): Record<string, string> {
     position: settings.position,
     enableMobile: String(settings.enableMobile),
     enableDesktop: String(settings.enableDesktop),
+    widthMode: settings.widthMode,
+    customWidth: String(settings.customWidth),
+    stickyPosition: settings.stickyPosition,
+    recommendationsEnabled: String(settings.recommendationsEnabled),
+    recommendationSource: settings.recommendationSource,
+    recommendationMax: String(settings.recommendationMax),
+    recommendationLayout: settings.recommendationLayout,
+    recommendationShowImage: String(settings.recommendationShowImage),
+    recommendationShowPrice: String(settings.recommendationShowPrice),
+    recommendationShowButton: String(settings.recommendationShowButton),
+    recommendationHideAfterGoal: String(settings.recommendationHideAfterGoal),
+    recommendationCollectionId: settings.recommendationCollectionId,
+    recommendationProductIds: settings.recommendationProductIds,
   };
 }
 
@@ -50,7 +66,10 @@ function toFormValues(settings: ShipBoostSettings): Record<string, string> {
  * the settings, tracks unsaved changes, validates input, and persists via a
  * Remix action (`useFetcher`).
  */
-export function SettingsForm({ initialSettings }: SettingsFormProps) {
+export function SettingsForm({
+  initialSettings,
+  hasProductScope = true,
+}: SettingsFormProps) {
   const shopify = useAppBridge();
   const fetcher = useFetcher<typeof action>();
 
@@ -161,6 +180,11 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
         onChange={update}
       />
       <PlacementSettingsCard settings={settings} onChange={update} />
+      <RecommendationsSettingsCard
+        settings={settings}
+        onChange={update}
+        hasProductScope={hasProductScope}
+      />
     </s-page>
   );
 }

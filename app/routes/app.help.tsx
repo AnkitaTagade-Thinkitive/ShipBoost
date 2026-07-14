@@ -64,6 +64,59 @@ export default function HelpPage() {
         </s-ordered-list>
       </s-section>
 
+      {/* Display On & Placement */}
+      <s-section heading="Display On & Placement">
+        <s-stack direction="block" gap="large">
+          <s-paragraph>
+            “Display On” controls which pages show the progress bar. How reliably
+            it works across pages depends on how you install ShipBoost — as an App
+            Embed (recommended) or as an App Block.
+          </s-paragraph>
+
+          <s-stack direction="block" gap="small-300">
+            <s-text type="strong">App Embed (recommended)</s-text>
+            <s-paragraph>
+              Enable the ShipBoost App Embed from Online Store → Themes →
+              Customize → App embeds. The App Embed renders on every page, so every
+              Display On option works:
+            </s-paragraph>
+            <s-unordered-list>
+              <s-list-item>All Pages</s-list-item>
+              <s-list-item>Homepage Only</s-list-item>
+              <s-list-item>Product Pages Only</s-list-item>
+              <s-list-item>Cart Page Only (the classic /cart page)</s-list-item>
+              <s-list-item>Product + Cart Pages</s-list-item>
+            </s-unordered-list>
+            <s-paragraph>
+              We recommend the App Embed for the best experience.
+            </s-paragraph>
+          </s-stack>
+
+          <s-stack direction="block" gap="small-300">
+            <s-text type="strong">App Block</s-text>
+            <s-paragraph>
+              If you add the ShipBoost App Block to a section instead, the bar
+              only appears on the templates where you’ve added it:
+            </s-paragraph>
+            <s-unordered-list>
+              <s-list-item>Product template → product pages only</s-list-item>
+              <s-list-item>Cart template → cart page only</s-list-item>
+              <s-list-item>Both templates → both pages</s-list-item>
+            </s-unordered-list>
+          </s-stack>
+
+          <s-stack direction="block" gap="small-300">
+            <s-text type="strong">Cart drawer limitation</s-text>
+            <s-paragraph>
+              Shopify Theme App Extensions cannot render inside Ajax cart drawers —
+              this is a Shopify platform limitation, not a ShipBoost restriction.
+              The progress bar works on the classic /cart page, but it cannot
+              appear inside a slide-out cart drawer or popup.
+            </s-paragraph>
+          </s-stack>
+        </s-stack>
+      </s-section>
+
       {/* FAQ */}
       <s-section heading="Frequently asked questions">
         <s-stack direction="block" gap="large">
@@ -86,8 +139,9 @@ export default function HelpPage() {
           </s-paragraph>
           <s-unordered-list>
             <s-list-item>
-              <s-text type="strong">Above / Below Product Information</s-text> —
-              product pages, around the product details.
+              <s-text type="strong">Below Header</s-text> — a top-level bar below
+              the site header on any page (announcement-bar style). Pair it with
+              Full Width for an edge-to-edge bar.
             </s-list-item>
             <s-list-item>
               <s-text type="strong">Above / Below Add to Cart</s-text> — product
@@ -97,6 +151,15 @@ export default function HelpPage() {
           <s-paragraph>
             If the chosen spot doesn’t exist in your theme, the bar simply stays
             where you placed the block — it never breaks your storefront.
+          </s-paragraph>
+          <s-paragraph>
+            <s-text type="strong">Sticky Top</s-text> keeps the bar pinned while
+            scrolling and is available only with the Below Header position, where
+            the bar is a top-level block.
+          </s-paragraph>
+          <s-paragraph>
+            For which pages the bar appears on (and the cart drawer limitation),
+            see the “Display On & Placement” section above.
           </s-paragraph>
         </s-stack>
       </s-section>

@@ -311,3 +311,252 @@
 .shipboost[data-position="below-add-to-cart"] {
   margin: 12px 0 16px;
 }
+/* None (below the site header) — full-width and flush under the header. */
+.shipboost[data-position="none"] {
+  margin: 0;
+}
+
+/* ---- 7. Bar width & sticky ------------------------------------------------- */
+/* Every width mode keeps the bar horizontally centered. `margin-inline: auto`
+   only touches left/right, so it never disturbs the vertical spacing set above.
+   Full Width (default) needs no rule — the base width:100% already applies, so
+   existing merchants are unchanged. */
+.shipboost.sb-width-content,
+.shipboost.sb-width-custom {
+  margin-inline: auto;
+}
+/* Content Width — aligned to the theme content container width. The extension
+   JS measures the theme's actual content container and sets an exact max-width;
+   this rule is the pre-JS/no-JS fallback, preferring the theme's own
+   `--page-width` variable (Dawn and many OS 2.0 themes expose it). */
+.shipboost.sb-width-content {
+  width: 100%;
+  max-width: var(--page-width, var(--sb-content-max, 1200px));
+}
+/* Custom Width — a percentage (30–100%) of the available width, centered. */
+.shipboost.sb-width-custom {
+  width: var(--sb-width, 100%);
+  max-width: 100%;
+}
+
+/* Sticky Top — pin to the top of the viewport while scrolling. `sticky` keeps
+   the bar in normal flow (no layout jump, no flicker); the modest z-index sits
+   above theme content but well below the Shopify admin bar (max z-index). */
+.shipboost.sb-sticky-top {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+
+/* ============================================================================
+   ShipBoost — Product Recommendations
+
+   MIRROR of extensions/ship-boost-progress-bar/assets/ship-boost-recommendations.css
+   (loaded on the storefront as a separate lazy asset). Kept here so the admin
+   Live Preview renders the recommendation cards identically. Keep in sync.
+   ============================================================================ */
+
+/* ---- 1. Layout container --------------------------------------------------- */
+/* Border-box so card padding/border is included in the flex-basis width — without
+   it, content-box padding pushes two 50% cards past 100% and they wrongly stack.
+   Scoped to our namespace so it never touches the theme. */
+.shipboost__recs,
+.shipboost__recs * {
+  box-sizing: border-box;
+}
+.shipboost__recs {
+  margin-top: 14px;
+}
+.shipboost__recs.sb-recs-hidden {
+  display: none !important;
+}
+.shipboost__recs-title {
+  margin: 0 0 10px 0;
+  padding: 0;
+  font-family: var(--sb-font-family, inherit);
+  font-size: calc(var(--sb-font-size, 12px) + 1px);
+  font-weight: 600;
+  color: var(--sb-text-color, inherit);
+  text-align: var(--sb-text-align, center);
+}
+.shipboost__recs-list {
+  display: flex;
+  gap: 10px;
+  align-items: stretch;
+  margin: 0;
+  padding: 0;
+}
+
+/* Horizontal (default) — a wrapping row of equal cards. */
+.shipboost__recs[data-layout="horizontal"] .shipboost__recs-list {
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+/* Vertical — full-width rows stacked; each card is a compact left-to-right row. */
+.shipboost__recs[data-layout="vertical"] .shipboost__recs-list {
+  flex-direction: column;
+}
+/* Carousel — a single non-wrapping row that scrolls horizontally, with snap. */
+.shipboost__recs[data-layout="carousel"] .shipboost__recs-list {
+  flex-direction: row;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 4px;
+}
+
+/* ---- 2. Card --------------------------------------------------------------- */
+.shipboost__rec-card {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 120px;
+  min-width: 0;
+  gap: 6px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: var(--sb-radius, 8px);
+  text-align: center;
+}
+.shipboost__recs[data-layout="vertical"] .shipboost__rec-card {
+  flex: 1 1 auto;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  text-align: left;
+}
+.shipboost__recs[data-layout="carousel"] .shipboost__rec-card {
+  flex: 0 0 auto;
+  width: 140px;
+  scroll-snap-align: start;
+}
+
+/* ---- 3. Image -------------------------------------------------------------- */
+.shipboost__rec-image-link {
+  display: block;
+  line-height: 0;
+}
+.shipboost__recs[data-layout="vertical"] .shipboost__rec-image-link {
+  flex: 0 0 auto;
+}
+.shipboost__rec-image {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  border-radius: calc(var(--sb-radius, 8px) - 2px);
+  background: rgba(0, 0, 0, 0.05);
+}
+.shipboost__rec-image--empty {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+}
+.shipboost__recs[data-layout="vertical"] .shipboost__rec-image {
+  width: 52px;
+  height: 52px;
+}
+
+/* ---- 4. Title + price ------------------------------------------------------ */
+.shipboost__rec-title {
+  font-family: var(--sb-font-family, inherit);
+  font-size: var(--sb-font-size, 12px);
+  font-weight: 500;
+  line-height: 1.3;
+  color: var(--sb-text-color, inherit);
+  text-decoration: none;
+  /* Clamp long titles to two lines so cards stay even. */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.shipboost__recs[data-layout="vertical"] .shipboost__rec-title {
+  flex: 1 1 auto;
+}
+.shipboost__rec-title:hover {
+  text-decoration: underline;
+}
+.shipboost__rec-price {
+  font-family: var(--sb-font-family, inherit);
+  font-size: var(--sb-font-size, 12px);
+  font-weight: 600;
+  color: var(--sb-text-color, inherit);
+}
+
+/* ---- 5. Add to cart button ------------------------------------------------- */
+.shipboost__rec-btn {
+  margin-top: auto;
+  padding: 7px 10px;
+  font-family: var(--sb-font-family, inherit);
+  font-size: calc(var(--sb-font-size, 12px) - 1px);
+  font-weight: 600;
+  color: #ffffff;
+  background: var(--sb-bar, #2e7d32);
+  border: none;
+  border-radius: var(--sb-radius, 8px);
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+.shipboost__recs[data-layout="vertical"] .shipboost__rec-btn {
+  margin-top: 0;
+  flex: 0 0 auto;
+}
+.shipboost__rec-btn:hover {
+  opacity: 0.9;
+}
+.shipboost__rec-btn:disabled,
+.shipboost__rec-btn.is-loading {
+  opacity: 0.6;
+  cursor: default;
+}
+
+/* ---- 6. Template identity (inherit each template's look) ------------------- */
+.shipboost--glass .shipboost__rec-card {
+  background: rgba(255, 255, 255, 0.12);
+  background: color-mix(in srgb, var(--sb-bg, #e8f5e9) 30%, transparent);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+}
+.shipboost--minimal .shipboost__rec-card {
+  background: transparent;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+.shipboost--luxury .shipboost__rec-card {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+}
+.shipboost--luxury .shipboost__rec-btn {
+  color: #1c1c1e;
+  background: linear-gradient(90deg, #bf953f, #fcf6ba, #b38728);
+}
+.shipboost--neon .shipboost__rec-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid color-mix(in srgb, var(--sb-bar, #39ff14) 40%, transparent);
+}
+.shipboost--neon .shipboost__rec-btn {
+  box-shadow: 0 0 8px color-mix(in srgb, var(--sb-bar, #39ff14) 50%, transparent);
+}
+
+/* ---- 7. Responsive --------------------------------------------------------- */
+@media (max-width: 749px) {
+  .shipboost__recs[data-layout="horizontal"] .shipboost__rec-card {
+    flex-basis: calc(50% - 5px);
+  }
+}
+@media (max-width: 479px) {
+  .shipboost__recs[data-layout="horizontal"] .shipboost__rec-card {
+    flex-basis: 100%;
+  }
+}
+
+/* ---- 8. Reduced motion ----------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .shipboost__rec-btn {
+    transition-duration: 0.01ms;
+  }
+  .shipboost__recs[data-layout="carousel"] .shipboost__recs-list {
+    scroll-behavior: auto;
+  }
+}

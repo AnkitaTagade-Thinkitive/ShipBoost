@@ -7,7 +7,18 @@ import {
   DEFAULT_TEXT_ALIGN,
   DEFAULT_TEXT_COLOR,
 } from "./typography";
-import { DEFAULT_DISPLAY_ON, DEFAULT_POSITION } from "./placement";
+import {
+  DEFAULT_DISPLAY_ON,
+  DEFAULT_POSITION,
+  DEFAULT_WIDTH_MODE,
+  DEFAULT_CUSTOM_WIDTH,
+  DEFAULT_STICKY_POSITION,
+} from "./placement";
+import {
+  DEFAULT_RECOMMENDATION_SOURCE,
+  DEFAULT_RECOMMENDATION_LAYOUT,
+  DEFAULT_RECOMMENDATION_MAX,
+} from "./recommendations";
 
 /**
  * Default ShipBoost settings.
@@ -37,4 +48,18 @@ export const DEFAULT_SETTINGS: ShipBoostSettings = {
   position: DEFAULT_POSITION,
   enableMobile: true,
   enableDesktop: true,
+  widthMode: DEFAULT_WIDTH_MODE,
+  customWidth: DEFAULT_CUSTOM_WIDTH,
+  stickyPosition: DEFAULT_STICKY_POSITION,
+  // Recommendations are off by default — existing merchants see no change.
+  recommendationsEnabled: false,
+  recommendationSource: DEFAULT_RECOMMENDATION_SOURCE,
+  recommendationMax: DEFAULT_RECOMMENDATION_MAX,
+  recommendationLayout: DEFAULT_RECOMMENDATION_LAYOUT,
+  recommendationShowImage: true,
+  recommendationShowPrice: true,
+  recommendationShowButton: true,
+  recommendationHideAfterGoal: true,
+  recommendationCollectionId: "",
+  recommendationProductIds: "",
 };
