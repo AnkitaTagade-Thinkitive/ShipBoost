@@ -1,79 +1,84 @@
 /* ============================================================================
    ShipBoost — Product Recommendations
 
-   Cards shown beneath the progress bar. They live INSIDE the `.shipboost`
-   wrapper, so they inherit the merchant's template, colours, radius, font and
-   text colour via the same CSS custom properties the bar uses (--sb-bar,
-   --sb-bg, --sb-radius, --sb-font-family, --sb-text-color, ...). Only appearance
-   is defined here; rendering + ranking + add-to-cart live in
-   ship-boost-recommendations.js.
+   Compact, secondary product suggestions shown beneath the progress bar. They
+   live INSIDE the `.shipboost` wrapper, so they inherit the merchant's template,
+   colours, radius, font and text colour via the same CSS custom properties the
+   bar uses (--sb-bar, --sb-bg, --sb-radius, --sb-font-family, --sb-text-color).
 
-   Layouts are switched by the container's [data-layout] attribute
-   (horizontal | vertical | carousel). Everything is namespaced under
-   `.shipboost__recs` so nothing leaks into the theme.
+   Design goals: small cards (~144px wide, ~190px tall) that support the purchase
+   decision without becoming a second product grid. The image is a FIXED height
+   (never scales with card width), cards never grow to fill the container, and
+   the row is centred and wraps responsively (3 desktop → 2 tablet → 1 mobile).
+
+   Layouts are switched by [data-layout] (horizontal | vertical | carousel).
+   Everything is namespaced under `.shipboost__recs`.
 
    NOTE: mirrored into app/components/settings/preview-templates.css for the
    admin Live Preview — keep the two copies in sync.
    ============================================================================ */
 
 /* ---- 1. Layout container --------------------------------------------------- */
-/* Border-box so card padding/border is included in the flex-basis width — without
-   it, content-box padding pushes two 50% cards past 100% and they wrongly stack.
-   Scoped to our namespace so it never touches the theme. */
+/* Border-box so card padding/border is included in width math (content-box
+   padding would push cards past their basis and break the row). Namespaced. */
 .shipboost__recs,
 .shipboost__recs * {
   box-sizing: border-box;
 }
 .shipboost__recs {
-  margin-top: 14px;
+  margin-top: 12px;
 }
 .shipboost__recs.sb-recs-hidden {
   display: none !important;
 }
 .shipboost__recs-title {
-  margin: 0 0 10px 0;
+  margin: 0 0 8px 0;
   padding: 0;
   font-family: var(--sb-font-family, inherit);
-  font-size: calc(var(--sb-font-size, 12px) + 1px);
+  font-size: var(--sb-font-size, 12px);
   font-weight: 600;
   color: var(--sb-text-color, inherit);
   text-align: var(--sb-text-align, center);
+  opacity: 0.85;
 }
 .shipboost__recs-list {
   display: flex;
-  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
   align-items: stretch;
+  gap: 10px;
   margin: 0;
   padding: 0;
 }
 
-/* Horizontal (default) — a wrapping row of equal cards. */
-.shipboost__recs[data-layout="horizontal"] .shipboost__recs-list {
-  flex-direction: row;
-  flex-wrap: wrap;
-}
 /* Vertical — full-width rows stacked; each card is a compact left-to-right row. */
 .shipboost__recs[data-layout="vertical"] .shipboost__recs-list {
   flex-direction: column;
+  flex-wrap: nowrap;
 }
 /* Carousel — a single non-wrapping row that scrolls horizontally, with snap. */
 .shipboost__recs[data-layout="carousel"] .shipboost__recs-list {
   flex-direction: row;
   flex-wrap: nowrap;
+  justify-content: flex-start;
   overflow-x: auto;
   scroll-snap-type: x mandatory;
   -webkit-overflow-scrolling: touch;
   padding-bottom: 4px;
 }
 
-/* ---- 2. Card --------------------------------------------------------------- */
+/* ---- 2. Card (small, fixed footprint — never grows to fill the row) -------- */
 .shipboost__rec-card {
   display: flex;
   flex-direction: column;
-  flex: 1 1 120px;
+  /* flex-grow 0 + a capped width keep the card compact even in a full-width or
+     very wide bar. The centred row means 1–3 small cards sit together neatly. */
+  flex: 0 1 144px;
+  width: 144px;
   min-width: 0;
+  max-width: 158px;
   gap: 6px;
-  padding: 10px;
+  padding: 8px;
   background: rgba(255, 255, 255, 0.6);
   border: 1px solid rgba(0, 0, 0, 0.08);
   border-radius: var(--sb-radius, 8px);
@@ -81,86 +86,99 @@
 }
 .shipboost__recs[data-layout="vertical"] .shipboost__rec-card {
   flex: 1 1 auto;
+  width: auto;
+  max-width: none;
   flex-direction: row;
   align-items: center;
   gap: 10px;
+  padding: 6px 8px;
   text-align: left;
 }
 .shipboost__recs[data-layout="carousel"] .shipboost__rec-card {
   flex: 0 0 auto;
-  width: 140px;
+  width: 144px;
+  max-width: 144px;
   scroll-snap-align: start;
 }
 
-/* ---- 3. Image -------------------------------------------------------------- */
+/* ---- 3. Image (FIXED height — the fix for oversized cards) ------------------ */
+/* A fixed height with object-fit:contain means the thumbnail never scales with
+   the card width (the old `aspect-ratio: 1/1; width: 100%` made a square image
+   as tall as the card was wide). `contain` shows the whole product without
+   cropping across the store's varied photo aspect ratios. */
 .shipboost__rec-image-link {
   display: block;
+  width: 100%;
   line-height: 0;
 }
 .shipboost__recs[data-layout="vertical"] .shipboost__rec-image-link {
   flex: 0 0 auto;
+  width: auto;
 }
-.shipboost__rec-image {
+.shipboost__rec-image,
+.shipboost__rec-image--empty {
   display: block;
   width: 100%;
-  aspect-ratio: 1 / 1;
-  object-fit: cover;
+  height: 84px;
+  object-fit: contain;
   border-radius: calc(var(--sb-radius, 8px) - 2px);
-  background: rgba(0, 0, 0, 0.05);
+  background: rgba(0, 0, 0, 0.04);
 }
-.shipboost__rec-image--empty {
-  width: 100%;
-  aspect-ratio: 1 / 1;
-}
-.shipboost__recs[data-layout="vertical"] .shipboost__rec-image {
-  width: 52px;
-  height: 52px;
+.shipboost__recs[data-layout="vertical"] .shipboost__rec-image,
+.shipboost__recs[data-layout="vertical"] .shipboost__rec-image--empty {
+  width: 46px;
+  height: 46px;
 }
 
 /* ---- 4. Title + price ------------------------------------------------------ */
 .shipboost__rec-title {
   font-family: var(--sb-font-family, inherit);
-  font-size: var(--sb-font-size, 12px);
+  font-size: 12px;
   font-weight: 500;
-  line-height: 1.3;
+  line-height: 1.25;
   color: var(--sb-text-color, inherit);
   text-decoration: none;
-  /* Clamp long titles to two lines so cards stay even. */
+  /* Clamp to two lines AND reserve their height so cards with 1- vs 2-line
+     titles stay the same height — no layout shift as recommendations refresh. */
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  min-height: 2.5em;
 }
 .shipboost__recs[data-layout="vertical"] .shipboost__rec-title {
   flex: 1 1 auto;
+  min-height: 0;
 }
 .shipboost__rec-title:hover {
   text-decoration: underline;
 }
 .shipboost__rec-price {
   font-family: var(--sb-font-family, inherit);
-  font-size: var(--sb-font-size, 12px);
-  font-weight: 600;
+  font-size: 12px;
+  font-weight: 700;
   color: var(--sb-text-color, inherit);
 }
 
-/* ---- 5. Add to cart button ------------------------------------------------- */
+/* ---- 5. Add to cart button (compact) --------------------------------------- */
 .shipboost__rec-btn {
   margin-top: auto;
-  padding: 7px 10px;
+  padding: 5px 8px;
   font-family: var(--sb-font-family, inherit);
-  font-size: calc(var(--sb-font-size, 12px) - 1px);
+  font-size: 11px;
   font-weight: 600;
+  line-height: 1.3;
   color: #ffffff;
   background: var(--sb-bar, #2e7d32);
   border: none;
-  border-radius: var(--sb-radius, 8px);
+  border-radius: calc(var(--sb-radius, 8px) - 2px);
   cursor: pointer;
   transition: opacity 0.2s ease;
 }
 .shipboost__recs[data-layout="vertical"] .shipboost__rec-btn {
   margin-top: 0;
   flex: 0 0 auto;
+  white-space: nowrap;
 }
 .shipboost__rec-btn:hover {
   opacity: 0.9;
@@ -199,15 +217,33 @@
   box-shadow: 0 0 8px color-mix(in srgb, var(--sb-bar, #39ff14) 50%, transparent);
 }
 
-/* ---- 7. Responsive --------------------------------------------------------- */
+/* ---- 7. Responsive (3 desktop → 2 tablet → 1 mobile) ----------------------- */
+/* Tablet: two per row. Cards grow to ~half the row but stay capped so they never
+   dominate; the fixed image height keeps them short. */
 @media (max-width: 749px) {
   .shipboost__recs[data-layout="horizontal"] .shipboost__rec-card {
-    flex-basis: calc(50% - 5px);
+    flex: 1 1 calc(50% - 5px);
+    width: auto;
+    max-width: 200px;
   }
 }
+/* Mobile: turn the horizontal layout into a compact swipeable carousel rather
+   than stacking every card full-width (which would push the product details far
+   down the page). Small cards with a peek make the swipe affordance obvious. */
 @media (max-width: 479px) {
+  .shipboost__recs[data-layout="horizontal"] .shipboost__recs-list {
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 4px;
+  }
   .shipboost__recs[data-layout="horizontal"] .shipboost__rec-card {
-    flex-basis: 100%;
+    flex: 0 0 auto;
+    width: 138px;
+    max-width: 138px;
+    scroll-snap-align: start;
   }
 }
 
