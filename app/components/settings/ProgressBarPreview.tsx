@@ -310,7 +310,11 @@ export function ProgressBarPreview({ settings }: ProgressBarPreviewProps) {
         </div>
 
         <div style={canvasStyle}>
-          <div className={wrapperClass} style={cssVars}>
+          <div
+            className={wrapperClass}
+            data-position={settings.position}
+            style={{ ...cssVars, margin: 0 }}
+          >
             <p className="shipboost__message">{message}</p>
             <div className="shipboost__track">
               <div
@@ -335,7 +339,11 @@ export function ProgressBarPreview({ settings }: ProgressBarPreviewProps) {
 
         <s-text color="subdued">Goal reached</s-text>
         <div style={successCanvasStyle}>
-          <div className={`${wrapperClass} is-complete`} style={cssVars}>
+          <div
+            className={`${wrapperClass} is-complete`}
+            data-position={settings.position}
+            style={{ ...cssVars, margin: 0 }}
+          >
             <p className="shipboost__message">{settings.successMessage}</p>
             <div className="shipboost__track">
               <div className="shipboost__fill" style={{ width: "100%" }} />
