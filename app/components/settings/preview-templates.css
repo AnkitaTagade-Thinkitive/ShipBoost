@@ -380,11 +380,12 @@
   opacity: 0.9;
 }
 
-/* ---- 2. Row list ----------------------------------------------------------- */
-/* Product-form placements: a stacked list that spans the SAME width as the
-   progress bar above it (consistent edges/alignment). In these placements the
-   bar sits in the narrow product column, so a full-width, edge-aligned row keeps
-   the button close to the product info instead of drifting to a distant edge. */
+/* ---- 2. Row list — placement- & layout-aware ------------------------------ */
+/* DEFAULT (stacked full-width rows spanning the progress-bar width). This is the
+   layout for EVERY product-form placement (a carousel next to the product form
+   is poor UX, so those always stack, whatever "Layout" is selected) AND for the
+   "Vertical" layout in the Below Header placement. Only Below Header honours the
+   Horizontal / Carousel layouts (rules below). */
 .shipboost__recs-list {
   display: flex;
   flex-direction: column;
@@ -393,16 +394,15 @@
   padding: 0;
 }
 
-/* Below Header: a compact horizontal carousel — ONE product fully visible, the
-   next peeking to invite swipe/scroll. Only this list scrolls (never the page),
-   and it is a single row tall so the hero stays right below it. */
-.shipboost[data-position="none"] .shipboost__recs-list {
+/* Below Header + Carousel / Horizontal: a horizontal, scroll-snapping strip.
+   Only this strip scrolls (never the page); it is one row tall so the hero stays
+   visible right below it. */
+.shipboost[data-position="none"] .shipboost__recs[data-layout="carousel"] .shipboost__recs-list,
+.shipboost[data-position="none"] .shipboost__recs[data-layout="horizontal"] .shipboost__recs-list {
   flex-direction: row;
   flex-wrap: nowrap;
   align-items: flex-start;
   gap: 10px;
-  max-width: none;
-  margin: 0;
   overflow-x: auto;
   overflow-y: hidden;
   scroll-snap-type: x mandatory;
@@ -410,13 +410,24 @@
   scrollbar-width: thin;
   padding-bottom: 4px;
 }
-.shipboost[data-position="none"] .shipboost__rec-card {
-  flex: 0 0 91%;
+.shipboost[data-position="none"] .shipboost__recs[data-layout="carousel"] .shipboost__rec-card,
+.shipboost[data-position="none"] .shipboost__recs[data-layout="horizontal"] .shipboost__rec-card {
   scroll-snap-align: start;
   border-top: none;
   border: 1px solid rgba(128, 128, 128, 0.16);
   border-radius: var(--sb-radius, 8px);
   padding: 8px 12px;
+}
+/* Carousel: ONE product fully visible, the next peeking. */
+.shipboost[data-position="none"] .shipboost__recs[data-layout="carousel"] .shipboost__rec-card {
+  flex: 0 0 91%;
+}
+/* Horizontal: compact fixed-width items, MULTIPLE visible, scrolling when they
+   overflow the strip. Wide enough that the title isn't squeezed by the theme
+   button; capped so a very narrow strip still peeks the next item. */
+.shipboost[data-position="none"] .shipboost__recs[data-layout="horizontal"] .shipboost__rec-card {
+  flex: 0 0 350px;
+  max-width: 88%;
 }
 
 /* ---- 3. Row (grid; image top-aligned with the title, price beneath) -------- */
@@ -560,9 +571,16 @@
     column-gap: 12px;
     padding: 8px 2px;
   }
-  .shipboost[data-position="none"] .shipboost__rec-card {
+  .shipboost[data-position="none"] .shipboost__recs[data-layout="carousel"] .shipboost__rec-card,
+  .shipboost[data-position="none"] .shipboost__recs[data-layout="horizontal"] .shipboost__rec-card {
+    padding: 8px 12px;
+  }
+  .shipboost[data-position="none"] .shipboost__recs[data-layout="carousel"] .shipboost__rec-card {
     flex-basis: 89%;
-    padding: 10px 12px;
+  }
+  .shipboost[data-position="none"] .shipboost__recs[data-layout="horizontal"] .shipboost__rec-card {
+    flex-basis: 300px;
+    max-width: 90%;
   }
   .shipboost__rec-image-link,
   .shipboost__rec-image,
