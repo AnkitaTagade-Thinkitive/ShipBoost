@@ -71,27 +71,36 @@ function RecommendationCards({
 }) {
   if (!products.length) return null;
 
-  // Links are rendered as inert <span>s here (the preview never navigates); the
-  // stylesheet targets by class, so they look identical to the storefront <a>s.
+  // Mirror the storefront's two-component split: Below Header ("none") renders
+  // the header component (layout-aware), every other placement the product
+  // component (always a stacked list). Same class namespaces as the storefront
+  // JS, so the mirrored stylesheet renders it identically. Links/buttons inert.
+  const isHeader = settings.position === "none";
+  const ns = isHeader ? "shipboost-header-recs" : "shipboost-product-recs";
+
   return (
-    <div className="shipboost__recs" data-layout={settings.recommendationLayout}>
-      <p className="shipboost__recs-title">Recommended products</p>
-      <div className="shipboost__recs-list" role="list">
+    <div
+      className={ns}
+      data-component={isHeader ? "header" : "product"}
+      {...(isHeader ? { "data-layout": settings.recommendationLayout } : {})}
+    >
+      <p className={`${ns}__title`}>Recommended products</p>
+      <div className={`${ns}__list`} data-sb-rec-list role="list">
         {products.map((product) => (
-          <div key={product.id} className="shipboost__rec-card" role="listitem">
+          <div key={product.id} className={`${ns}__card`} role="listitem">
             {settings.recommendationShowImage ? (
-              <span className="shipboost__rec-image-link" aria-hidden="true">
-                <span className="shipboost__rec-image shipboost__rec-image--empty" />
+              <span className={`${ns}__img-link`} aria-hidden="true">
+                <span className={`${ns}__img ${ns}__img--empty`} />
               </span>
             ) : null}
-            <span className="shipboost__rec-title">{product.title}</span>
+            <span className={`${ns}__name`}>{product.title}</span>
             {settings.recommendationShowPrice ? (
-              <span className="shipboost__rec-price">
+              <span className={`${ns}__price`}>
                 {formatMoney(product.price)}
               </span>
             ) : null}
             {settings.recommendationShowButton ? (
-              <button type="button" className="shipboost__rec-btn" disabled>
+              <button type="button" className={`${ns}__btn`} disabled>
                 Add to cart
               </button>
             ) : null}

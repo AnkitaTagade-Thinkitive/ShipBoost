@@ -240,13 +240,21 @@
     below (image, title, price, add-to-cart), and refreshed on every cart change.
   {%- endcomment -%}
   {%- if sb_recs_enabled and sb_recs_products and sb_recs_products.size > 0 -%}
+    {%- comment -%}
+      Two independent components. Below Header ("none") renders the header
+      component (layout-aware, compact scrolling strip); every other placement
+      renders the product component (always a stacked upsell list). The shared JS
+      engine fills whichever list is present.
+    {%- endcomment -%}
+    {%- if sb_position == 'none' -%}{%- assign sb_recs_component = 'header' -%}{%- else -%}{%- assign sb_recs_component = 'product' -%}{%- endif -%}
     {{ 'ship-boost-recommendations.css' | asset_url | stylesheet_tag }}
     <div
-      class="shipboost__recs{% if sb_reached and sb_recs_hide_after_goal %} sb-recs-hidden{% endif %}"
+      class="shipboost-{{ sb_recs_component }}-recs{% if sb_reached and sb_recs_hide_after_goal %} sb-recs-hidden{% endif %}"
       data-shipboost-recs
+      data-component="{{ sb_recs_component }}"
+      data-layout="{{ sb_recs_layout | handleize }}"
       data-source="{{ sb_recs_source }}"
       data-max="{{ sb_recs_max }}"
-      data-layout="{{ sb_recs_layout | handleize }}"
       data-show-image="{{ sb_recs_show_image }}"
       data-show-price="{{ sb_recs_show_price }}"
       data-show-button="{{ sb_recs_show_button }}"
@@ -257,8 +265,8 @@
       data-cart-variants="{{ cart.items | map: 'variant_id' | json | escape }}"
       data-products="{{ sb_recs_products | json | escape }}"
     >
-      <p class="shipboost__recs-title">Recommended products</p>
-      <div class="shipboost__recs-list" role="list"></div>
+      <p class="shipboost-{{ sb_recs_component }}-recs__title">Recommended products</p>
+      <div class="shipboost-{{ sb_recs_component }}-recs__list" data-sb-rec-list role="list"></div>
     </div>
     {{ 'ship-boost-recommendations.js' | asset_url | script_tag }}
   {%- endif -%}
