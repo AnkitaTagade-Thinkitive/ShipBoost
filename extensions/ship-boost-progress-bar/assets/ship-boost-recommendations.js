@@ -256,10 +256,102 @@
       });
   }
 
+  /* ---- Theme button inheritance ------------------------------------------- */
+  // Make the recommendation "Add to cart" button look like the merchant's theme
+  // button, with NO hardcoded colours. We find the theme's real Add-to-cart (or
+  // a prominent theme button as a fallback), read its COMPUTED styles, and feed
+  // them into the `--sb-rec-btn-*` custom properties the CSS consumes. If nothing
+  // is found the CSS fallbacks (merchant bar colour) apply. Works on any Online
+  // Store 2.0 theme (Dawn, Craft, Sense, Refresh, Ride, Studio, …) because it
+  // reads live styles instead of relying on theme-specific class names.
+  var THEME_BUTTON_SELECTORS = [
+    ".product-form__submit",
+    'button[name="add"]',
+    '[name="add"]',
+    'form[action*="/cart/add"] [type="submit"]',
+    ".shopify-payment-button__button--unbranded",
+    ".shopify-payment-button__button",
+    ".button--primary",
+    ".btn--primary",
+    ".btn-primary",
+    "button.button",
+    "a.button",
+    ".button",
+    ".btn",
+  ];
+
+  function isTransparent(color) {
+    return (
+      !color ||
+      color === "transparent" ||
+      /rgba?\(\s*0\s*,\s*0\s*,\s*0\s*,\s*0\s*\)/.test(color)
+    );
+  }
+
+  function findThemeButton() {
+    for (var i = 0; i < THEME_BUTTON_SELECTORS.length; i++) {
+      var els = document.querySelectorAll(THEME_BUTTON_SELECTORS[i]);
+      for (var j = 0; j < els.length; j++) {
+        var el = els[j];
+        // Never sample our own button, and require a visibly-rendered element.
+        if (el.closest && el.closest(".shipboost")) continue;
+        var rect = el.getBoundingClientRect();
+        if (rect.width > 40 && rect.height > 16) return el;
+      }
+    }
+    return null;
+  }
+
+  function applyThemeButtonStyle() {
+    var ref = findThemeButton();
+    if (!ref) return false;
+    var containers = document.querySelectorAll("[data-shipboost-recs]");
+    if (!containers.length) return false;
+
+    var cs = window.getComputedStyle(ref);
+    var props = {
+      "--sb-rec-btn-color": cs.color,
+      "--sb-rec-btn-bg-image": cs.backgroundImage,
+      "--sb-rec-btn-border":
+        cs.borderTopWidth + " " + cs.borderTopStyle + " " + cs.borderTopColor,
+      "--sb-rec-btn-radius": cs.borderTopLeftRadius,
+      "--sb-rec-btn-font-family": cs.fontFamily,
+      "--sb-rec-btn-font-weight": cs.fontWeight,
+      "--sb-rec-btn-letter-spacing": cs.letterSpacing,
+      "--sb-rec-btn-text-transform": cs.textTransform,
+      "--sb-rec-btn-shadow": cs.boxShadow,
+    };
+    // Only override the background colour when the theme button actually has one
+    // (skip transparent/ghost buttons so the CTA never renders invisible).
+    if (!isTransparent(cs.backgroundColor)) {
+      props["--sb-rec-btn-bg-color"] = cs.backgroundColor;
+    }
+
+    for (var c = 0; c < containers.length; c++) {
+      for (var k in props) {
+        if (props[k]) containers[c].style.setProperty(k, props[k]);
+      }
+    }
+    return true;
+  }
+
+  // Themes (esp. those that hydrate sections client-side) may render the button
+  // after us — retry a couple of times, then give up and keep the fallback.
+  function syncThemeButton(attempt) {
+    if (applyThemeButtonStyle()) return;
+    if (attempt >= 3) return;
+    setTimeout(function () {
+      syncThemeButton(attempt + 1);
+    }, 600 * (attempt + 1));
+  }
+
   /* ---- init ---------------------------------------------------------------- */
   function init() {
     var containers = document.querySelectorAll("[data-shipboost-recs]");
     if (!containers.length) return;
+
+    // Match the theme's button style (best-effort, with retries + fallback).
+    syncThemeButton(0);
 
     // Initial render from the server-provided cart snapshot — no fetch on load.
     var first = containers[0];

@@ -1,32 +1,30 @@
 /* ============================================================================
    ShipBoost — Product Recommendations
 
-   Lightweight upsell rows shown beneath the progress bar to nudge the customer
-   toward the free-shipping goal. Modelled on modern Shopify upsell apps
-   (Selleasy / Frequently Bought Together / Essential Upsell): a compact
-   horizontal ROW, never a product-card grid, so it stays visually secondary to
-   the product.
+   Lightweight upsell rows shown beneath the progress bar. Modelled on modern
+   Shopify upsell apps (Selleasy / Frequently Bought Together / Essential
+   Upsell): a compact horizontal ROW, never a product-card grid, so it stays
+   visually secondary to the product.
 
-   Each row is a 3-column layout, achieved with CSS grid over the existing flat
-   markup (image-link, title, price, button) — no JS/markup change:
+   Each row is a 3-column grid over the existing flat markup (image-link, title,
+   price, button) — no JS/markup change is needed for the layout:
 
        ┌───────────────────────────────────────────────┐
        │  [img]   Product title            [ Add ]      │
        │          $29.99                                │
        └───────────────────────────────────────────────┘
 
-   Image left (spans both rows, centred). Title over price in the middle.
-   Add-to-cart pill pinned far right (spans both rows, centred, never wraps).
-   Rows are separated by subtle dividers.
+   Placement-aware (from the bar's data-position):
+     • Below Header ("none") → a compact HORIZONTAL strip: one product visible,
+       swipe/scroll for the rest, so the hero is never pushed down.
+     • Product-form placements → a stacked vertical list of rows.
 
-   The rows inherit the merchant's template/colours/font via the same CSS custom
-   properties the bar uses (--sb-bar, --sb-text-color, --sb-font-family,
-   --sb-radius). Everything is namespaced under `.shipboost__recs`.
+   The Add-to-cart button INHERITS the active theme's button style at runtime:
+   ship-boost-recommendations.js reads the theme's real Add-to-cart button and
+   populates the `--sb-rec-btn-*` custom properties below. When no theme button
+   is found, it falls back to the merchant's bar colour — nothing is hardcoded.
 
-   Position-aware (from the bar's data-position):
-     • Below Header ("none") → the row LIST gets a max-height and scrolls
-       internally, so the panel never pushes the hero/page down.
-     • Other placements     → rows simply stack.
+   Everything is namespaced under `.shipboost__recs`.
 
    NOTE: mirrored into app/components/settings/preview-templates.css for the
    admin Live Preview — keep the two copies in sync.
@@ -56,8 +54,7 @@
 }
 
 /* ---- 2. Row list ----------------------------------------------------------- */
-/* Rows are always a vertical list regardless of the merchant's Layout setting —
-   the compact row IS the design across every placement and device. */
+/* Product-form placements: a stacked vertical list of compact rows. */
 .shipboost__recs-list {
   display: flex;
   flex-direction: column;
@@ -66,12 +63,27 @@
   padding: 0;
 }
 
-/* Below Header: cap the list height and scroll only the list (not the page), so
-   the hero section stays visible right below the panel. */
+/* Below Header: a compact horizontal strip — ONE product fully visible, the
+   next peeking to signal swipe/scroll. Only this list scrolls (never the page),
+   and it is a single row tall so the hero stays right below it. */
 .shipboost[data-position="none"] .shipboost__recs-list {
-  max-height: 228px;
-  overflow-y: auto;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  gap: 8px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
   -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  padding-bottom: 4px;
+}
+.shipboost[data-position="none"] .shipboost__rec-card {
+  flex: 0 0 92%;
+  scroll-snap-align: start;
+  border-top: none;
+  border: 1px solid rgba(128, 128, 128, 0.18);
+  border-radius: var(--sb-radius, 8px);
+  padding: 8px 10px;
 }
 
 /* ---- 3. Row (3-column grid over the flat markup) --------------------------- */
@@ -142,30 +154,40 @@
   opacity: 0.82;
 }
 
-/* ---- 6. Add to cart (compact pill, far right, centred, never wraps) -------- */
+/* ---- 6. Add to cart — inherits the theme's button style -------------------- */
+/* Every value falls back to the merchant's bar colour / a neutral pill, so the
+   button always renders even before (or without) theme detection. The JS sets
+   the `--sb-rec-btn-*` properties from the theme's real Add-to-cart button.
+   Size stays compact on purpose so it fits the upsell row (we inherit the
+   theme's identity — colour, border, radius, font, shadow — not its full size). */
 .shipboost__rec-btn {
   grid-area: btn;
   align-self: center;
   justify-self: end;
   height: 32px;
   padding: 0 15px;
-  font-family: var(--sb-font-family, inherit);
-  font-size: 13px;
-  font-weight: 600;
   line-height: 1;
   white-space: nowrap;
-  color: #ffffff;
-  background: var(--sb-bar, #2e7d32);
-  border: none;
-  border-radius: 999px;
   cursor: pointer;
-  transition: opacity 0.2s ease, transform 0.1s ease;
+  font-family: var(--sb-rec-btn-font-family, var(--sb-font-family, inherit));
+  font-size: 13px;
+  font-weight: var(--sb-rec-btn-font-weight, 600);
+  letter-spacing: var(--sb-rec-btn-letter-spacing, normal);
+  text-transform: var(--sb-rec-btn-text-transform, none);
+  color: var(--sb-rec-btn-color, #ffffff);
+  background-color: var(--sb-rec-btn-bg-color, var(--sb-bar, #2e7d32));
+  background-image: var(--sb-rec-btn-bg-image, none);
+  border: var(--sb-rec-btn-border, 0 solid transparent);
+  border-radius: var(--sb-rec-btn-radius, 999px);
+  box-shadow: var(--sb-rec-btn-shadow, none);
+  transition: filter 0.15s ease, opacity 0.15s ease, transform 0.1s ease;
 }
 .shipboost__rec-btn:hover {
-  opacity: 0.9;
+  filter: brightness(0.93);
 }
 .shipboost__rec-btn:active {
   transform: scale(0.97);
+  filter: brightness(0.88);
 }
 .shipboost__rec-btn:disabled,
 .shipboost__rec-btn.is-loading {
@@ -173,23 +195,20 @@
   cursor: default;
 }
 
-/* ---- 7. Template identity (button only — rows stay flat/lightweight) ------- */
-.shipboost--luxury .shipboost__rec-btn {
-  color: #1c1c1e;
-  background: linear-gradient(90deg, #bf953f, #fcf6ba, #b38728);
-}
-.shipboost--neon .shipboost__rec-btn {
-  box-shadow: 0 0 8px color-mix(in srgb, var(--sb-bar, #39ff14) 55%, transparent);
-}
+/* ---- 7. Template tweak (dividers only — the button follows the theme) ------ */
 .shipboost--minimal .shipboost__rec-card {
   border-top-color: rgba(128, 128, 128, 0.16);
 }
 
-/* ---- 8. Responsive (rows stay compact on every device) --------------------- */
+/* ---- 8. Responsive (rows stay compact; header strip swipes on mobile) ------ */
 @media (max-width: 479px) {
   .shipboost__rec-card {
     column-gap: 10px;
     padding: 8px 0;
+  }
+  .shipboost[data-position="none"] .shipboost__rec-card {
+    flex-basis: 90%;
+    padding: 8px 10px;
   }
   .shipboost__rec-image-link,
   .shipboost__rec-image,
@@ -206,10 +225,6 @@
   .shipboost__rec-btn {
     height: 30px;
     padding: 0 12px;
-    font-size: 12px;
-  }
-  .shipboost[data-position="none"] .shipboost__recs-list {
-    max-height: 210px;
   }
 }
 
