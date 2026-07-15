@@ -155,14 +155,25 @@ function parseProductIds(raw: string): string[] {
   return ids.slice(0, MAX_FETCH);
 }
 
-async function fetchBestSelling(
+/**
+ * Fetch a bounded pool of products from the whole catalog.
+ *
+ * NOTE: the Admin API's top-level `products` connection has NO `BEST_SELLING`
+ * sort — `ProductSortKeys` only offers CREATED_AT/UPDATED_AT/TITLE/… (best-selling
+ * exists only on a *collection's* products and on the Storefront API). Passing
+ * `BEST_SELLING` makes the whole query error out and return zero products. We
+ * sort by most-recently-updated instead: for the Smart Match source the order is
+ * irrelevant (it re-ranks by price), and the Best Sellers source approximates
+ * popularity with recency until a Storefront-API path is added.
+ */
+async function fetchProductPool(
   admin: AdminGraphqlClient,
   count: number,
 ): Promise<RecommendationProduct[]> {
   const response = await admin.graphql(
     `${PRODUCT_FIELDS}
-      query ShipBoostBestSellers($count: Int!) {
-        products(first: $count, sortKey: BEST_SELLING) {
+      query ShipBoostProductPool($count: Int!) {
+        products(first: $count, sortKey: UPDATED_AT, reverse: true) {
           nodes {
             ...ShipBoostRecProduct
           }
@@ -174,7 +185,7 @@ async function fetchBestSelling(
     data?: { products?: { nodes?: RawProduct[] } };
     errors?: unknown;
   };
-  logGraphqlErrors(json, "Best-sellers query");
+  logGraphqlErrors(json, "Product pool query");
   return (json.data?.products?.nodes ?? [])
     .map(toCompact)
     .filter((p): p is RecommendationProduct => p !== null);
@@ -251,9 +262,9 @@ export async function fetchRecommendationProducts(
 
   switch (settings.recommendationSource) {
     case "smart":
-      return fetchBestSelling(admin, SMART_POOL_SIZE);
+      return fetchProductPool(admin, SMART_POOL_SIZE);
     case "best-sellers":
-      return fetchBestSelling(admin, cardCount);
+      return fetchProductPool(admin, cardCount);
     case "collection":
       return fetchCollection(admin, settings.recommendationCollectionId, cardCount);
     case "manual":
