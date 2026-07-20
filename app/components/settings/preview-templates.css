@@ -487,27 +487,48 @@
 .shipboost-header-recs__btn {
   grid-area: btn;
   align-self: center;
-  justify-self: end;
-  height: 32px;
-  padding: 0 15px;
+  justify-self: var(--sb-rec-btn-justify, end);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: var(--sb-rec-btn-height, 32px);
+  padding: var(--sb-rec-btn-padding, 0 15px);
   line-height: 1;
   white-space: nowrap;
   cursor: pointer;
   font-family: var(--sb-rec-btn-font-family, var(--sb-font-family, inherit));
-  font-size: 13px;
+  font-size: var(--sb-rec-btn-font-size, 13px);
   font-weight: var(--sb-rec-btn-font-weight, 600);
   letter-spacing: var(--sb-rec-btn-letter-spacing, normal);
   text-transform: var(--sb-rec-btn-text-transform, none);
   color: var(--sb-rec-btn-color, #ffffff);
   background-color: var(--sb-rec-btn-bg-color, var(--sb-bar, #2e7d32));
   background-image: var(--sb-rec-btn-bg-image, none);
-  border: var(--sb-rec-btn-border, 0 solid transparent);
+  border: var(--sb-rec-btn-border-width, 0)
+    var(--sb-rec-btn-border-style, solid)
+    var(--sb-rec-btn-border-color, transparent);
   border-radius: var(--sb-rec-btn-radius, 999px);
   box-shadow: var(--sb-rec-btn-shadow, none);
-  transition: filter 0.15s ease, opacity 0.15s ease, transform 0.1s ease;
+  transition: var(
+    --sb-rec-btn-transition,
+    filter 0.15s ease,
+    opacity 0.15s ease,
+    transform 0.1s ease
+  );
 }
 .shipboost-header-recs__btn:hover {
   filter: brightness(0.93);
+  background-color: var(
+    --sb-rec-btn-hover-bg,
+    var(--sb-rec-btn-bg-color, var(--sb-bar, #2e7d32))
+  );
+  color: var(--sb-rec-btn-hover-color, var(--sb-rec-btn-color, #ffffff));
+  border-color: var(
+    --sb-rec-btn-hover-border-color,
+    var(--sb-rec-btn-border-color, transparent)
+  );
+  box-shadow: var(--sb-rec-btn-hover-shadow, var(--sb-rec-btn-shadow, none));
 }
 .shipboost-header-recs__btn:active {
   transform: scale(0.97);
@@ -645,27 +666,48 @@
 .shipboost-product-recs__btn {
   grid-area: btn;
   align-self: center;
-  justify-self: end;
-  height: 32px;
-  padding: 0 15px;
+  justify-self: var(--sb-rec-btn-justify, end);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: var(--sb-rec-btn-height, 32px);
+  padding: var(--sb-rec-btn-padding, 0 15px);
   line-height: 1;
   white-space: nowrap;
   cursor: pointer;
   font-family: var(--sb-rec-btn-font-family, var(--sb-font-family, inherit));
-  font-size: 13px;
+  font-size: var(--sb-rec-btn-font-size, 13px);
   font-weight: var(--sb-rec-btn-font-weight, 600);
   letter-spacing: var(--sb-rec-btn-letter-spacing, normal);
   text-transform: var(--sb-rec-btn-text-transform, none);
   color: var(--sb-rec-btn-color, #ffffff);
   background-color: var(--sb-rec-btn-bg-color, var(--sb-bar, #2e7d32));
   background-image: var(--sb-rec-btn-bg-image, none);
-  border: var(--sb-rec-btn-border, 0 solid transparent);
+  border: var(--sb-rec-btn-border-width, 0)
+    var(--sb-rec-btn-border-style, solid)
+    var(--sb-rec-btn-border-color, transparent);
   border-radius: var(--sb-rec-btn-radius, 999px);
   box-shadow: var(--sb-rec-btn-shadow, none);
-  transition: filter 0.15s ease, opacity 0.15s ease, transform 0.1s ease;
+  transition: var(
+    --sb-rec-btn-transition,
+    filter 0.15s ease,
+    opacity 0.15s ease,
+    transform 0.1s ease
+  );
 }
 .shipboost-product-recs__btn:hover {
   filter: brightness(0.93);
+  background-color: var(
+    --sb-rec-btn-hover-bg,
+    var(--sb-rec-btn-bg-color, var(--sb-bar, #2e7d32))
+  );
+  color: var(--sb-rec-btn-hover-color, var(--sb-rec-btn-color, #ffffff));
+  border-color: var(
+    --sb-rec-btn-hover-border-color,
+    var(--sb-rec-btn-border-color, transparent)
+  );
+  box-shadow: var(--sb-rec-btn-hover-shadow, var(--sb-rec-btn-shadow, none));
 }
 .shipboost-product-recs__btn:active {
   transform: scale(0.97);
@@ -712,6 +754,41 @@
     height: 30px;
     padding: 0 12px;
   }
+}
+
+/* ---- Button width, alignment & icon (both components) ---------------------- */
+/* Full/Fit width drop the button onto its own row below the details (classes set
+   by the JS from the button config). Full = 100%; Fit = content width, aligned
+   by --sb-rec-btn-justify. */
+.shipboost-header-recs.sb-rec-btn-w-full .shipboost-header-recs__card,
+.shipboost-header-recs.sb-rec-btn-w-fit .shipboost-header-recs__card,
+.shipboost-product-recs.sb-rec-btn-w-full .shipboost-product-recs__card,
+.shipboost-product-recs.sb-rec-btn-w-fit .shipboost-product-recs__card {
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-areas:
+    "img name"
+    "img price"
+    "btn btn";
+  row-gap: 6px;
+}
+.shipboost-header-recs.sb-rec-btn-w-full .shipboost-header-recs__btn,
+.shipboost-product-recs.sb-rec-btn-w-full .shipboost-product-recs__btn {
+  justify-self: stretch;
+  width: 100%;
+}
+.shipboost-header-recs.sb-rec-btn-w-fit .shipboost-header-recs__btn,
+.shipboost-product-recs.sb-rec-btn-w-fit .shipboost-product-recs__btn {
+  justify-self: var(--sb-rec-btn-justify, start);
+  width: auto;
+}
+/* Icon inside the button (inherits the button text colour via currentColor). */
+.shipboost-rec-ico {
+  display: inline-flex;
+  align-items: center;
+  line-height: 0;
+}
+.shipboost-rec-ico svg {
+  display: block;
 }
 
 /* ---- Reduced motion (both components) -------------------------------------- */

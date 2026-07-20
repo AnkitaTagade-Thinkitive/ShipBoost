@@ -156,15 +156,6 @@ test("recommendation max is rounded to an integer", () => {
   assert.equal(value.recommendationMax, 3);
 });
 
-test("an unknown recommendation layout falls back to horizontal", () => {
-  const { value } = validateSettings({
-    ...DEFAULT_SETTINGS,
-    // @ts-expect-error deliberately invalid to test normalization
-    recommendationLayout: "spiral",
-  });
-  assert.equal(value.recommendationLayout, "horizontal");
-});
-
 test("collection and product IDs are trimmed", () => {
   const { value } = validateSettings({
     ...DEFAULT_SETTINGS,

@@ -68,13 +68,17 @@ model ShipBoostSetting {
   recommendationsEnabled      Boolean @default(false)
   recommendationSource        String  @default("smart")
   recommendationMax           Int     @default(3)
-  recommendationLayout        String  @default("horizontal")
   recommendationShowImage     Boolean @default(true)
   recommendationShowPrice     Boolean @default(true)
   recommendationShowButton    Boolean @default(true)
   recommendationHideAfterGoal Boolean @default(true)
   recommendationCollectionId  String  @default("")
   recommendationProductIds    String  @default("")
+  // Add-to-cart button customization. Mode is "theme" (inherit + overrides) or
+  // "custom"; the button style/overrides are stored as a JSON string. Defaults
+  // keep the existing auto-detected theme button (backward compatible).
+  recommendationButtonMode    String  @default("theme")
+  recommendationButton        String  @default("{}")
 
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt

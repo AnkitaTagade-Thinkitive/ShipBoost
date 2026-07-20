@@ -15,14 +15,17 @@ import {
   isWidthMode,
 } from "./placement";
 import {
-  DEFAULT_RECOMMENDATION_LAYOUT,
   DEFAULT_RECOMMENDATION_MAX,
   DEFAULT_RECOMMENDATION_SOURCE,
   RECOMMENDATION_MAX_MAX,
   RECOMMENDATION_MAX_MIN,
-  isRecommendationLayout,
   isRecommendationSource,
 } from "./recommendations";
+import {
+  DEFAULT_REC_BUTTON_MODE,
+  isRecButtonMode,
+  normalizeRecButton,
+} from "./recButton";
 import {
   DEFAULT_FONT_FAMILY,
   DEFAULT_FONT_SIZE,
@@ -158,9 +161,13 @@ export function validateSettings(input: ShipBoostSettings): ValidationResult {
   const recommendationMax = Number.isFinite(input.recommendationMax)
     ? Math.min(Math.max(roundedMax, RECOMMENDATION_MAX_MIN), RECOMMENDATION_MAX_MAX)
     : DEFAULT_RECOMMENDATION_MAX;
-  const recommendationLayout = isRecommendationLayout(input.recommendationLayout)
-    ? input.recommendationLayout
-    : DEFAULT_RECOMMENDATION_LAYOUT;
+
+  // Add-to-cart button: mode normalized to a known value; the config object is
+  // normalized (unknown keys dropped, strings trimmed, label never empty).
+  const recommendationButtonMode = isRecButtonMode(input.recommendationButtonMode)
+    ? input.recommendationButtonMode
+    : DEFAULT_REC_BUTTON_MODE;
+  const recommendationButton = normalizeRecButton(input.recommendationButton);
 
   return {
     errors: Object.keys(errors).length > 0 ? errors : null,
@@ -186,9 +193,10 @@ export function validateSettings(input: ShipBoostSettings): ValidationResult {
       stickyPosition,
       recommendationSource,
       recommendationMax,
-      recommendationLayout,
       recommendationCollectionId: input.recommendationCollectionId.trim(),
       recommendationProductIds: input.recommendationProductIds.trim(),
+      recommendationButtonMode,
+      recommendationButton,
     },
   };
 }

@@ -53,6 +53,13 @@ export interface RecommendationProduct {
   variantId: string;
   /** Whether the first variant is purchasable right now. */
   available: boolean;
+  /**
+   * Verified storefront URL for the product. It is the product's real
+   * `onlineStoreUrl` when available, otherwise the relative `/products/<handle>`
+   * path — only ever set for PUBLISHED products (unpublished products are
+   * dropped in `toCompact`), so following it never lands on a 404.
+   */
+  url: string;
 }
 
 /** Payload stored in the `recommendations` metafield. */
@@ -74,6 +81,10 @@ interface RawProduct {
   id: string;
   handle: string;
   title: string;
+  /** Set once the product is published; null for draft/archived/unpublished. */
+  publishedAt: string | null;
+  /** Public online-store URL, or null (e.g. a password-protected store). */
+  onlineStoreUrl: string | null;
   featuredImage: { url: string } | null;
   variants: {
     nodes: { id: string; price: string; availableForSale: boolean }[];
@@ -85,6 +96,8 @@ const PRODUCT_FIELDS = `#graphql
     id
     handle
     title
+    publishedAt
+    onlineStoreUrl
     featuredImage {
       url
     }
@@ -120,9 +133,18 @@ function logGraphqlErrors(json: { errors?: unknown }, label: string): void {
   }
 }
 
-/** Distill a raw product to the compact shape, or null if it has no variant. */
+/**
+ * Distill a raw product to the compact shape, or null to DROP it. A product is
+ * dropped when it has no variant, an invalid price, OR is not published
+ * (`publishedAt` is null) — the latter guarantees a recommendation never links
+ * to a deleted/draft/unpublished product, which would open a 404 storefront
+ * page. Publication is the reliable signal even on password-protected stores,
+ * where `onlineStoreUrl` is null for every product.
+ */
 function toCompact(raw: RawProduct | null | undefined): RecommendationProduct | null {
   if (!raw) return null;
+  // Not published to the online store → its /products/<handle> page 404s. Skip.
+  if (!raw.publishedAt) return null;
   const variant = raw.variants?.nodes?.[0];
   if (!variant) return null;
 
@@ -138,6 +160,9 @@ function toCompact(raw: RawProduct | null | undefined): RecommendationProduct | 
     price: Math.round(amount * 100),
     variantId: numericId(variant.id),
     available: Boolean(variant.availableForSale),
+    // Verified URL: the real online-store URL when present, else the relative
+    // product path (valid because we only reach here for published products).
+    url: raw.onlineStoreUrl || "/products/" + raw.handle,
   };
 }
 

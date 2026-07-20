@@ -14,6 +14,7 @@ import { AppearanceSettingsCard } from "./AppearanceSettingsCard";
 import { TypographySettingsCard } from "./TypographySettingsCard";
 import { PlacementSettingsCard } from "./PlacementSettingsCard";
 import { RecommendationsSettingsCard } from "./RecommendationsSettingsCard";
+import { RecommendationButtonCard } from "./RecommendationButtonCard";
 import { ProgressBarPreview } from "./ProgressBarPreview";
 
 interface SettingsFormProps {
@@ -51,13 +52,14 @@ function toFormValues(settings: ShipBoostSettings): Record<string, string> {
     recommendationsEnabled: String(settings.recommendationsEnabled),
     recommendationSource: settings.recommendationSource,
     recommendationMax: String(settings.recommendationMax),
-    recommendationLayout: settings.recommendationLayout,
     recommendationShowImage: String(settings.recommendationShowImage),
     recommendationShowPrice: String(settings.recommendationShowPrice),
     recommendationShowButton: String(settings.recommendationShowButton),
     recommendationHideAfterGoal: String(settings.recommendationHideAfterGoal),
     recommendationCollectionId: settings.recommendationCollectionId,
     recommendationProductIds: settings.recommendationProductIds,
+    recommendationButtonMode: settings.recommendationButtonMode,
+    recommendationButton: JSON.stringify(settings.recommendationButton),
   };
 }
 
@@ -185,6 +187,9 @@ export function SettingsForm({
         onChange={update}
         hasProductScope={hasProductScope}
       />
+      {settings.recommendationsEnabled ? (
+        <RecommendationButtonCard settings={settings} onChange={update} />
+      ) : null}
     </s-page>
   );
 }

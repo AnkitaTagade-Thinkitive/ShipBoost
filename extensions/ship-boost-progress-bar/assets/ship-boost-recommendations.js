@@ -105,6 +105,7 @@
       goal: parseInt(container.getAttribute("data-goal"), 10) || 0,
       currency: container.getAttribute("data-currency") || "USD",
       products: parseJSON(container.getAttribute("data-products"), []) || [],
+      button: parseJSON(container.getAttribute("data-btn"), {}) || {},
     };
   }
 
@@ -123,6 +124,32 @@
     return pool.slice(0, cfg.max);
   }
 
+  // Built-in icon SVGs — MIRROR of app/lib/settings/recButton.ts REC_BUTTON_ICONS.
+  var REC_ICONS = {
+    cart:
+      '<svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="17" r="1"/><circle cx="15" cy="17" r="1"/><path d="M2 3h2l1.6 9.3a1 1 0 0 0 1 .7h7.2a1 1 0 0 0 1-.8L17 6H5"/></svg>',
+    plus:
+      '<svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M10 4v12M4 10h12"/></svg>',
+    arrow:
+      '<svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10h11M11 5l5 5-5 5"/></svg>',
+  };
+  function sanitizeSvg(svg) {
+    if (!svg || svg.indexOf("<svg") === -1) return "";
+    return svg
+      .replace(/<script[\s\S]*?<\/script>/gi, "")
+      .replace(/on\w+\s*=\s*("[^"]*"|'[^']*'|[^\s>]+)/gi, "")
+      .replace(/(href|xlink:href)\s*=\s*(["'])\s*javascript:[^"']*\2/gi, "")
+      .trim();
+  }
+  function buttonIconHtml(btn) {
+    if (!btn || !btn.icon || btn.icon === "none") return "";
+    var svg =
+      btn.icon === "custom" ? sanitizeSvg(btn.iconSvg) : REC_ICONS[btn.icon] || "";
+    return svg
+      ? '<span class="shipboost-rec-ico" aria-hidden="true">' + svg + "</span>"
+      : "";
+  }
+
   // Build one recommendation item. The MARKUP is identical for both components
   // (image, name, price, button — the shared engine output); only the class
   // namespace differs so each component's CSS block styles it independently.
@@ -133,7 +160,10 @@
       cfg.component === "header"
         ? "shipboost-header-recs"
         : "shipboost-product-recs";
-    var url = "/products/" + encodeURIComponent(product.handle);
+    // Use the app-verified product URL (only published products are published to
+    // the metafield, so it never 404s). Fall back to the handle path for older
+    // metafield payloads that predate the `url` field.
+    var url = product.url || "/products/" + encodeURIComponent(product.handle);
     var html = '<div class="' + ns + '__card" role="listitem">';
 
     if (cfg.showImage) {
@@ -175,12 +205,18 @@
     }
 
     if (cfg.showButton) {
+      var bcfg = cfg.button || {};
+      var icon = buttonIconHtml(bcfg);
+      var label = esc(bcfg.text || "Add to cart");
+      var inner = bcfg.iconPosition === "right" ? label + icon : icon + label;
       html +=
         '<button type="button" class="' +
         ns +
         '__btn" data-sb-rec-add data-variant-id="' +
         esc(product.variantId) +
-        '">Add to cart</button>';
+        '">' +
+        inner +
+        "</button>";
     }
 
     html += "</div>";
@@ -324,18 +360,14 @@
     return null;
   }
 
-  function applyThemeButtonStyle() {
-    var ref = findThemeButton();
-    if (!ref) return false;
-    var containers = document.querySelectorAll("[data-shipboost-recs]");
-    if (!containers.length) return false;
-
+  // Set the theme-detected base button vars on a container (theme mode only).
+  function applyThemeBase(container, ref) {
     var cs = window.getComputedStyle(ref);
     var props = {
       "--sb-rec-btn-color": cs.color,
       "--sb-rec-btn-bg-image": cs.backgroundImage,
-      "--sb-rec-btn-border":
-        cs.borderTopWidth + " " + cs.borderTopStyle + " " + cs.borderTopColor,
+      "--sb-rec-btn-border-width": cs.borderTopWidth,
+      "--sb-rec-btn-border-color": cs.borderTopColor,
       "--sb-rec-btn-radius": cs.borderTopLeftRadius,
       "--sb-rec-btn-font-family": cs.fontFamily,
       "--sb-rec-btn-font-weight": cs.fontWeight,
@@ -343,27 +375,125 @@
       "--sb-rec-btn-text-transform": cs.textTransform,
       "--sb-rec-btn-shadow": cs.boxShadow,
     };
-    // Only override the background colour when the theme button actually has one
-    // (skip transparent/ghost buttons so the CTA never renders invisible).
+    // Skip transparent/ghost backgrounds so the CTA never renders invisible.
     if (!isTransparent(cs.backgroundColor)) {
       props["--sb-rec-btn-bg-color"] = cs.backgroundColor;
     }
-
-    for (var c = 0; c < containers.length; c++) {
-      for (var k in props) {
-        if (props[k]) containers[c].style.setProperty(k, props[k]);
-      }
+    for (var k in props) {
+      if (props[k]) container.style.setProperty(k, props[k]);
     }
-    return true;
   }
 
-  // Themes (esp. those that hydrate sections client-side) may render the button
-  // after us — retry a couple of times, then give up and keep the fallback.
-  function syncThemeButton(attempt) {
-    if (applyThemeButtonStyle()) return;
+  /* Config → --sb-rec-btn-* vars. MIRROR of app/lib/settings/recButton.ts
+     recButtonCssVars — keep the two in sync. Only non-empty fields produce a
+     property, so in theme mode the detected values remain for everything the
+     merchant didn't override. */
+  var BTN_SIZE_PRESET = {
+    small: { h: 28, px: 12, fs: 12 },
+    medium: { h: 32, px: 15, fs: 13 },
+    large: { h: 40, px: 22, fs: 15 },
+  };
+  function btnPx(v) {
+    return /^-?\d+(\.\d+)?$/.test(v) ? v + "px" : v;
+  }
+  function btnDur(v) {
+    return /^\d+(\.\d+)?$/.test(v) ? v + "ms" : v;
+  }
+  function recButtonVars(cfg) {
+    cfg = cfg || {};
+    var vars = {};
+    function set(k, v) {
+      if (v) vars[k] = v;
+    }
+    set("--sb-rec-btn-bg-color", cfg.bg);
+    set("--sb-rec-btn-color", cfg.textColor);
+    set("--sb-rec-btn-border-color", cfg.borderColor);
+    if (cfg.borderWidth) set("--sb-rec-btn-border-width", btnPx(cfg.borderWidth));
+    set("--sb-rec-btn-border-style", cfg.borderStyle);
+    if (cfg.radius) set("--sb-rec-btn-radius", btnPx(cfg.radius));
+    set("--sb-rec-btn-shadow", cfg.shadow);
+    set("--sb-rec-btn-font-family", cfg.fontFamily);
+    set("--sb-rec-btn-font-weight", cfg.fontWeight);
+    set("--sb-rec-btn-letter-spacing", cfg.letterSpacing);
+    set("--sb-rec-btn-text-transform", cfg.textTransform);
+    set("--sb-rec-btn-hover-bg", cfg.hoverBg);
+    set("--sb-rec-btn-hover-color", cfg.hoverTextColor);
+    set("--sb-rec-btn-hover-border-color", cfg.hoverBorderColor);
+    set("--sb-rec-btn-hover-shadow", cfg.hoverShadow);
+    if (cfg.transitionDuration || cfg.transitionTiming) {
+      set(
+        "--sb-rec-btn-transition",
+        "all " +
+          btnDur(cfg.transitionDuration || "150") +
+          " " +
+          (cfg.transitionTiming || "ease"),
+      );
+    }
+    if (cfg.align === "left") set("--sb-rec-btn-justify", "start");
+    else if (cfg.align === "center") set("--sb-rec-btn-justify", "center");
+    else if (cfg.align === "right") set("--sb-rec-btn-justify", "end");
+    var preset = cfg.size ? BTN_SIZE_PRESET[cfg.size] : null;
+    var height = preset ? preset.h + "px" : "";
+    var padX = preset ? String(preset.px) : "";
+    var fontSize = preset ? preset.fs + "px" : "";
+    if (cfg.fontSize) fontSize = btnPx(cfg.fontSize);
+    if (cfg.paddingX) padX = cfg.paddingX;
+    if (cfg.paddingY) {
+      set("--sb-rec-btn-padding", btnPx(cfg.paddingY) + " " + btnPx(padX || "15"));
+      set("--sb-rec-btn-height", "auto");
+    } else {
+      if (padX) set("--sb-rec-btn-padding", "0 " + btnPx(padX));
+      if (height) set("--sb-rec-btn-height", height);
+    }
+    set("--sb-rec-btn-font-size", fontSize);
+    return vars;
+  }
+
+  function readButtonConfig(container) {
+    return {
+      mode:
+        container.getAttribute("data-btn-mode") === "custom"
+          ? "custom"
+          : "theme",
+      cfg: parseJSON(container.getAttribute("data-btn"), {}) || {},
+    };
+  }
+
+  // Apply the button style to every recs container: theme mode detects the theme
+  // button (once, shared) then applies overrides; custom mode applies the config
+  // directly. Returns true once all theme-mode containers have a detected button.
+  function applyButtons() {
+    var containers = document.querySelectorAll("[data-shipboost-recs]");
+    if (!containers.length) return true;
+    var ref = null;
+    var needRef = false;
+    for (var i = 0; i < containers.length; i++) {
+      var b = readButtonConfig(containers[i]);
+      if (b.mode === "theme") {
+        needRef = true;
+        if (!ref) ref = findThemeButton();
+        if (ref) applyThemeBase(containers[i], ref);
+      }
+      var vars = recButtonVars(b.cfg);
+      for (var k in vars) containers[i].style.setProperty(k, vars[k]);
+      // Width layout (backward compatible with the old `fullWidth` boolean).
+      var width = b.cfg.width || (b.cfg.fullWidth === true ? "full" : "");
+      containers[i].classList.toggle("sb-rec-btn-w-full", width === "full");
+      containers[i].classList.toggle("sb-rec-btn-w-fit", width === "fit");
+      containers[i].classList.toggle(
+        "sb-rec-btn-aligned",
+        !!(b.cfg.align && width),
+      );
+    }
+    return !needRef || !!ref;
+  }
+
+  // Themes may render their button after us — retry a couple of times.
+  function syncButtons(attempt) {
+    if (applyButtons()) return;
     if (attempt >= 3) return;
     setTimeout(function () {
-      syncThemeButton(attempt + 1);
+      syncButtons(attempt + 1);
     }, 600 * (attempt + 1));
   }
 
@@ -446,8 +576,8 @@
     var containers = document.querySelectorAll("[data-shipboost-recs]");
     if (!containers.length) return;
 
-    // Match the theme's button style (best-effort, with retries + fallback).
-    syncThemeButton(0);
+    // Apply the Add-to-cart button style (theme detect + overrides, or custom).
+    syncButtons(0);
 
     // Enable drag/wheel horizontal scrolling on header strips only.
     for (var h = 0; h < containers.length; h++) {

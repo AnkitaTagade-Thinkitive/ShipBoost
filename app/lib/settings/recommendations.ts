@@ -39,35 +39,11 @@ export function isRecommendationSource(
   );
 }
 
-/* ---- Layout --------------------------------------------------------------- */
-
-export const RECOMMENDATION_LAYOUTS = [
-  "horizontal",
-  "vertical",
-  "carousel",
-] as const;
-
-export type RecommendationLayout = (typeof RECOMMENDATION_LAYOUTS)[number];
-
-export const DEFAULT_RECOMMENDATION_LAYOUT: RecommendationLayout = "horizontal";
-
-export const RECOMMENDATION_LAYOUT_OPTIONS: {
-  value: RecommendationLayout;
-  label: string;
-}[] = [
-  { value: "horizontal", label: "Horizontal" },
-  { value: "vertical", label: "Vertical" },
-  { value: "carousel", label: "Carousel" },
-];
-
-export function isRecommendationLayout(
-  value: unknown,
-): value is RecommendationLayout {
-  return (
-    typeof value === "string" &&
-    (RECOMMENDATION_LAYOUTS as readonly string[]).includes(value)
-  );
-}
+/* ---- Layout ---------------------------------------------------------------
+   REMOVED. The storefront now uses two fixed, placement-based components (a
+   single-product header scroller and a stacked product-page list), so a
+   merchant-facing Layout setting would have no effect. See the storefront CSS
+   (ship-boost-recommendations.css) for the two components. */
 
 /* ---- Maximum products ----------------------------------------------------- */
 

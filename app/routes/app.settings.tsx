@@ -17,7 +17,6 @@ import type {
   FontFamily,
   FontWeight,
   Position,
-  RecommendationLayout,
   RecommendationSource,
   ShipBoostSettings,
   StickyPosition,
@@ -104,9 +103,6 @@ function parseForm(formData: FormData): ShipBoostSettings {
       formData.get("recommendationSource") ?? "smart",
     ) as RecommendationSource,
     recommendationMax: Number(formData.get("recommendationMax")),
-    recommendationLayout: String(
-      formData.get("recommendationLayout") ?? "horizontal",
-    ) as RecommendationLayout,
     recommendationShowImage: formData.get("recommendationShowImage") === "true",
     recommendationShowPrice: formData.get("recommendationShowPrice") === "true",
     recommendationShowButton:
@@ -119,7 +115,27 @@ function parseForm(formData: FormData): ShipBoostSettings {
     recommendationProductIds: String(
       formData.get("recommendationProductIds") ?? "",
     ),
+    recommendationButtonMode: String(
+      formData.get("recommendationButtonMode") ?? "theme",
+    ) as ShipBoostSettings["recommendationButtonMode"],
+    // The button config travels as a single JSON string; validate normalizes it.
+    recommendationButton: parseButtonField(
+      formData.get("recommendationButton"),
+    ),
   };
+}
+
+/** Parse the serialized button config; validation normalizes the result. */
+function parseButtonField(
+  value: FormDataEntryValue | null,
+): ShipBoostSettings["recommendationButton"] {
+  try {
+    return JSON.parse(
+      String(value ?? "{}"),
+    ) as ShipBoostSettings["recommendationButton"];
+  } catch {
+    return {} as ShipBoostSettings["recommendationButton"];
+  }
 }
 
 export const action = async ({ request }: ActionFunctionArgs) => {

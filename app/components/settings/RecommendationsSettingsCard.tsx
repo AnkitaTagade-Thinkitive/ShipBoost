@@ -1,12 +1,10 @@
 import { useAppBridge } from "@shopify/app-bridge-react";
 
 import type {
-  RecommendationLayout,
   RecommendationSource,
   ShipBoostSettings,
 } from "../../lib/settings/types";
 import {
-  RECOMMENDATION_LAYOUT_OPTIONS,
   RECOMMENDATION_MAX_MAX,
   RECOMMENDATION_MAX_MIN,
   RECOMMENDATION_MAX_OPTIONS,
@@ -156,25 +154,6 @@ export function RecommendationsSettingsCard({
                   </s-option>
                 ))}
               </s-select>
-
-              <s-select
-                label="Layout"
-                details="How the product cards are arranged."
-                value={settings.recommendationLayout}
-                onChange={(event) =>
-                  onChange({
-                    recommendationLayout: fieldValue(
-                      event,
-                    ) as RecommendationLayout,
-                  })
-                }
-              >
-                {RECOMMENDATION_LAYOUT_OPTIONS.map((option) => (
-                  <s-option key={option.value} value={option.value}>
-                    {option.label}
-                  </s-option>
-                ))}
-              </s-select>
             </s-grid>
 
             {settings.recommendationSource === "collection" ? (
@@ -187,9 +166,13 @@ export function RecommendationsSettingsCard({
                 {settings.recommendationCollectionId ? (
                   <s-text color="subdued">1 collection selected.</s-text>
                 ) : (
-                  <s-text color="subdued">
-                    Choose the collection to recommend products from.
-                  </s-text>
+                  <s-banner tone="warning" heading="No collection selected">
+                    <s-paragraph>
+                      You chose the Collection source but haven&apos;t picked a
+                      collection yet. Select one, then save — otherwise no
+                      recommendations will appear on your storefront.
+                    </s-paragraph>
+                  </s-banner>
                 )}
               </s-stack>
             ) : null}
@@ -201,11 +184,19 @@ export function RecommendationsSettingsCard({
                     ? "Change products"
                     : "Select products"}
                 </s-button>
-                <s-text color="subdued">
-                  {productIds.length > 0
-                    ? `${productIds.length} product${productIds.length === 1 ? "" : "s"} selected.`
-                    : "Choose the specific products to recommend."}
-                </s-text>
+                {productIds.length > 0 ? (
+                  <s-text color="subdued">
+                    {`${productIds.length} product${productIds.length === 1 ? "" : "s"} selected.`}
+                  </s-text>
+                ) : (
+                  <s-banner tone="warning" heading="No products selected">
+                    <s-paragraph>
+                      You chose the Manual Products source but haven&apos;t
+                      picked any products yet. Select at least one, then save —
+                      otherwise no recommendations will appear on your storefront.
+                    </s-paragraph>
+                  </s-banner>
+                )}
               </s-stack>
             ) : null}
 

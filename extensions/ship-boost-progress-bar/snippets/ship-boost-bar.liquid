@@ -41,7 +41,7 @@
 {%- assign sb_recs_enabled = false -%}
 {%- assign sb_recs_source = 'smart' -%}
 {%- assign sb_recs_max = 3 -%}
-{%- assign sb_recs_layout = 'horizontal' -%}
+{%- assign sb_recs_btn_mode = 'theme' -%}
 {%- assign sb_recs_show_image = true -%}
 {%- assign sb_recs_show_price = true -%}
 {%- assign sb_recs_show_button = true -%}
@@ -75,7 +75,7 @@
   {%- if sb_settings.recommendationsEnabled == true -%}{%- assign sb_recs_enabled = true -%}{%- endif -%}
   {%- if sb_settings.recommendationSource -%}{%- assign sb_recs_source = sb_settings.recommendationSource -%}{%- endif -%}
   {%- if sb_settings.recommendationMax -%}{%- assign sb_recs_max = sb_settings.recommendationMax -%}{%- endif -%}
-  {%- if sb_settings.recommendationLayout -%}{%- assign sb_recs_layout = sb_settings.recommendationLayout -%}{%- endif -%}
+  {%- if sb_settings.recommendationButtonMode -%}{%- assign sb_recs_btn_mode = sb_settings.recommendationButtonMode -%}{%- endif -%}
   {%- if sb_settings.recommendationShowImage == false -%}{%- assign sb_recs_show_image = false -%}{%- endif -%}
   {%- if sb_settings.recommendationShowPrice == false -%}{%- assign sb_recs_show_price = false -%}{%- endif -%}
   {%- if sb_settings.recommendationShowButton == false -%}{%- assign sb_recs_show_button = false -%}{%- endif -%}
@@ -252,7 +252,8 @@
       class="shipboost-{{ sb_recs_component }}-recs{% if sb_reached and sb_recs_hide_after_goal %} sb-recs-hidden{% endif %}"
       data-shipboost-recs
       data-component="{{ sb_recs_component }}"
-      data-layout="{{ sb_recs_layout | handleize }}"
+      data-btn-mode="{{ sb_recs_btn_mode }}"
+      data-btn="{{ sb_settings.recommendationButton | json | escape }}"
       data-source="{{ sb_recs_source }}"
       data-max="{{ sb_recs_max }}"
       data-show-image="{{ sb_recs_show_image }}"

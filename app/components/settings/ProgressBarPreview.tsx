@@ -19,6 +19,11 @@ import {
 import { loadGoogleFont } from "../../lib/settings/fontLoader";
 import { normalizeHexColor } from "../../lib/settings/color";
 import { smartMatch } from "../../lib/recommendations/smart-match";
+import {
+  recButtonClasses,
+  recButtonCssVars,
+  recButtonIconSvg,
+} from "../../lib/settings/recButton";
 
 interface ProgressBarPreviewProps {
   settings: ShipBoostSettings;
@@ -77,12 +82,28 @@ function RecommendationCards({
   // JS, so the mirrored stylesheet renders it identically. Links/buttons inert.
   const isHeader = settings.position === "none";
   const ns = isHeader ? "shipboost-header-recs" : "shipboost-product-recs";
+  // Apply the merchant's button config as --sb-rec-btn-* vars, exactly like the
+  // storefront. (In Theme mode the preview can't detect the live theme button,
+  // so it shows the overrides over the neutral fallback; Custom mode matches
+  // the storefront exactly.)
+  const btn = settings.recommendationButton;
+  const btnVars = recButtonCssVars(btn) as CSSProperties;
+  const btnLabel = btn.text || "Add to cart";
+  const btnClasses = recButtonClasses(btn);
+  const iconSvg = recButtonIconSvg(btn);
+  const iconEl = iconSvg ? (
+    <span
+      className="shipboost-rec-ico"
+      aria-hidden="true"
+      dangerouslySetInnerHTML={{ __html: iconSvg }}
+    />
+  ) : null;
 
   return (
     <div
-      className={ns}
+      className={`${ns}${btnClasses ? " " + btnClasses : ""}`}
       data-component={isHeader ? "header" : "product"}
-      {...(isHeader ? { "data-layout": settings.recommendationLayout } : {})}
+      style={btnVars}
     >
       <p className={`${ns}__title`}>Recommended products</p>
       <div className={`${ns}__list`} data-sb-rec-list role="list">
@@ -101,7 +122,17 @@ function RecommendationCards({
             ) : null}
             {settings.recommendationShowButton ? (
               <button type="button" className={`${ns}__btn`} disabled>
-                Add to cart
+                {btn.iconPosition === "right" ? (
+                  <>
+                    {btnLabel}
+                    {iconEl}
+                  </>
+                ) : (
+                  <>
+                    {iconEl}
+                    {btnLabel}
+                  </>
+                )}
               </button>
             ) : null}
           </div>

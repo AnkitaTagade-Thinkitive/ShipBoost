@@ -25,14 +25,17 @@ import {
   isWidthMode,
 } from "./placement";
 import {
-  DEFAULT_RECOMMENDATION_LAYOUT,
   DEFAULT_RECOMMENDATION_MAX,
   DEFAULT_RECOMMENDATION_SOURCE,
   RECOMMENDATION_MAX_MAX,
   RECOMMENDATION_MAX_MIN,
-  isRecommendationLayout,
   isRecommendationSource,
 } from "./recommendations";
+import {
+  DEFAULT_REC_BUTTON_MODE,
+  isRecButtonMode,
+  normalizeRecButton,
+} from "./recButton";
 import type { CurrencyCode, ShipBoostSettings } from "./types";
 
 /**
@@ -94,16 +97,39 @@ function toSettings(record: ShipBoostSetting): ShipBoostSettings {
           RECOMMENDATION_MAX_MAX,
         )
       : DEFAULT_RECOMMENDATION_MAX,
-    recommendationLayout: isRecommendationLayout(record.recommendationLayout)
-      ? record.recommendationLayout
-      : DEFAULT_RECOMMENDATION_LAYOUT,
     recommendationShowImage: record.recommendationShowImage,
     recommendationShowPrice: record.recommendationShowPrice,
     recommendationShowButton: record.recommendationShowButton,
     recommendationHideAfterGoal: record.recommendationHideAfterGoal,
     recommendationCollectionId: record.recommendationCollectionId,
     recommendationProductIds: record.recommendationProductIds,
+    recommendationButtonMode: isRecButtonMode(record.recommendationButtonMode)
+      ? record.recommendationButtonMode
+      : DEFAULT_REC_BUTTON_MODE,
+    // The button config is stored as a JSON string; parse + normalize it.
+    recommendationButton: normalizeRecButton(
+      parseButton(record.recommendationButton),
+    ),
   };
+}
+
+/** Parse the stored button JSON string; tolerate missing/invalid data. */
+function parseButton(value: string | null | undefined): unknown {
+  if (!value) return {};
+  try {
+    return JSON.parse(value);
+  } catch {
+    return {};
+  }
+}
+
+/**
+ * Convert UI-facing settings to the Prisma row shape. Only the button config
+ * needs transforming — it is stored as a JSON string column.
+ */
+function toRecord(settings: ShipBoostSettings) {
+  const { recommendationButton, ...rest } = settings;
+  return { ...rest, recommendationButton: JSON.stringify(recommendationButton) };
 }
 
 /**
@@ -117,7 +143,7 @@ export async function getSettings(shop: string): Promise<ShipBoostSettings> {
   }
 
   const created = await prisma.shipBoostSetting.create({
-    data: { shop, ...DEFAULT_SETTINGS },
+    data: { shop, ...toRecord(DEFAULT_SETTINGS) },
   });
   return toSettings(created);
 }
@@ -132,8 +158,8 @@ export async function saveSettings(
 ): Promise<ShipBoostSettings> {
   const record = await prisma.shipBoostSetting.upsert({
     where: { shop },
-    update: settings,
-    create: { shop, ...settings },
+    update: toRecord(settings),
+    create: { shop, ...toRecord(settings) },
   });
   return toSettings(record);
 }

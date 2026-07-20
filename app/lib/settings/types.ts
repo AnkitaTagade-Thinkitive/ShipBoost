@@ -11,15 +11,14 @@ import type {
   WidthMode,
   StickyPosition,
 } from "./placement";
-import type {
-  RecommendationSource,
-  RecommendationLayout,
-} from "./recommendations";
+import type { RecommendationSource } from "./recommendations";
+import type { RecButton, RecButtonMode } from "./recButton";
 
 export type { TemplateStyle };
 export type { FontFamily, FontWeight, TextAlign };
 export type { DisplayOn, Position, WidthMode, StickyPosition };
-export type { RecommendationSource, RecommendationLayout };
+export type { RecommendationSource };
+export type { RecButton, RecButtonMode };
 
 /**
  * Currency codes we currently expose in the admin. In a later phase this will
@@ -110,9 +109,6 @@ export interface ShipBoostSettings {
   /** Maximum number of products to show (1–4). */
   recommendationMax: number;
 
-  /** Card layout for the recommendations. */
-  recommendationLayout: RecommendationLayout;
-
   /** Show the product image on each card. */
   recommendationShowImage: boolean;
 
@@ -130,4 +126,13 @@ export interface ShipBoostSettings {
 
   /** Comma-separated product GIDs for the "manual" source (empty otherwise). */
   recommendationProductIds: string;
+
+  /**
+   * Add-to-cart button styling mode: "theme" inherits the live theme button and
+   * lets the merchant override individual properties; "custom" is fully manual.
+   */
+  recommendationButtonMode: RecButtonMode;
+
+  /** Add-to-cart button config (overrides in theme mode, full style in custom). */
+  recommendationButton: RecButton;
 }

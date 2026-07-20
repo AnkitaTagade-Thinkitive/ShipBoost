@@ -16,9 +16,9 @@ import {
 } from "./placement";
 import {
   DEFAULT_RECOMMENDATION_SOURCE,
-  DEFAULT_RECOMMENDATION_LAYOUT,
   DEFAULT_RECOMMENDATION_MAX,
 } from "./recommendations";
+import { DEFAULT_REC_BUTTON, DEFAULT_REC_BUTTON_MODE } from "./recButton";
 
 /**
  * Default ShipBoost settings.
@@ -55,11 +55,14 @@ export const DEFAULT_SETTINGS: ShipBoostSettings = {
   recommendationsEnabled: false,
   recommendationSource: DEFAULT_RECOMMENDATION_SOURCE,
   recommendationMax: DEFAULT_RECOMMENDATION_MAX,
-  recommendationLayout: DEFAULT_RECOMMENDATION_LAYOUT,
   recommendationShowImage: true,
   recommendationShowPrice: true,
   recommendationShowButton: true,
   recommendationHideAfterGoal: true,
   recommendationCollectionId: "",
   recommendationProductIds: "",
+  // Add-to-cart button defaults to Theme mode with no overrides — existing
+  // merchants keep the auto-detected theme button, unchanged.
+  recommendationButtonMode: DEFAULT_REC_BUTTON_MODE,
+  recommendationButton: DEFAULT_REC_BUTTON,
 };
