@@ -1,35 +1,20 @@
-import { FeatureCard } from "./FeatureCard";
+import { CTASection } from "./CTASection";
+import { DashboardPreview } from "./DashboardPreview";
+import { FAQSection } from "./FAQSection";
+import { FeatureGrid } from "./FeatureGrid";
+import { Footer } from "./Footer";
 import { GradientBlobs } from "./GradientBlobs";
-
-const FEATURES = [
-  {
-    icon: "🚚",
-    title: "Free Shipping Progress Bars",
-    description:
-      "Increase Average Order Value with customizable free shipping goals.",
-  },
-  {
-    icon: "🛍",
-    title: "Smart Product Recommendations",
-    description:
-      "Recommend products intelligently to encourage larger purchases.",
-  },
-  {
-    icon: "🎨",
-    title: "Fully Customizable",
-    description:
-      "Customize colors, layouts, typography, spacing, icons and animations.",
-  },
-];
+import { HowItWorks } from "./HowItWorks";
+import { Logo } from "./Logo";
 
 /**
  * Public marketing landing page shown at "/" to visitors who reach the app
  * directly (i.e. outside of Shopify Admin, with no `shop`/`host` context).
  *
- * This is purely presentational. The only functional element is the primary
- * CTA, which points at `/auth` — the existing, unmodified Shopify OAuth entry
- * point. Merchants opening the app from Admin never see this page; they are
- * forwarded to `/app` by the route loader before it renders.
+ * This is purely presentational. The only functional elements are the CTAs,
+ * which point at `/auth` — the existing, unmodified Shopify OAuth entry point.
+ * Merchants opening the app from Admin never see this page; they are forwarded
+ * to `/app` by the route loader before it renders.
  */
 export function LandingPage() {
   return (
@@ -40,9 +25,7 @@ export function LandingPage() {
         {/* Nav */}
         <header className="sb-nav sb-fade-in">
           <div className="sb-nav__brand">
-            <span className="sb-nav__logo" aria-hidden="true">
-              ⚡
-            </span>
+            <Logo size={38} glow className="sb-nav__logo" />
             <span className="sb-nav__name">ShipBoost</span>
           </div>
           <a className="sb-btn sb-btn--ghost sb-nav__cta" href="/auth">
@@ -52,6 +35,10 @@ export function LandingPage() {
 
         {/* Hero */}
         <section className="sb-hero">
+          <div className="sb-hero__mark sb-fade-up" style={{ animationDelay: "20ms" }}>
+            <Logo size={88} glow float className="sb-hero__logo" />
+          </div>
+
           <span className="sb-badge sb-fade-up" style={{ animationDelay: "60ms" }}>
             ✨ Shopify Embedded App
           </span>
@@ -70,6 +57,7 @@ export function LandingPage() {
 
           {/* Main card */}
           <div className="sb-card sb-fade-up" style={{ animationDelay: "240ms" }}>
+            <Logo size={64} glow className="sb-card__logo" />
             <h2 className="sb-card__title">Welcome to ShipBoost</h2>
             <p className="sb-card__lead">This is a Shopify Embedded App.</p>
             <p className="sb-card__text">
@@ -89,23 +77,31 @@ export function LandingPage() {
           </div>
         </section>
 
+        <hr className="sb-divider" />
+
+        {/* Dashboard preview */}
+        <DashboardPreview />
+
+        <hr className="sb-divider" />
+
+        {/* How it works */}
+        <HowItWorks />
+
+        <hr className="sb-divider" />
+
         {/* Features */}
-        <section className="sb-features" aria-label="Features">
-          {FEATURES.map((feature, i) => (
-            <FeatureCard
-              key={feature.title}
-              icon={feature.icon}
-              title={feature.title}
-              description={feature.description}
-              delay={300 + i * 90}
-            />
-          ))}
-        </section>
+        <FeatureGrid />
+
+        <hr className="sb-divider" />
+
+        {/* FAQ */}
+        <FAQSection />
+
+        {/* Final CTA */}
+        <CTASection />
 
         {/* Footer */}
-        <footer className="sb-footer">
-          <p>Made with ❤️ for Shopify Merchants</p>
-        </footer>
+        <Footer />
       </div>
     </div>
   );

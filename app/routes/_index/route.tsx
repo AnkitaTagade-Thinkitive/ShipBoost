@@ -33,6 +33,8 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 
 export const links: LinksFunction = () => [
   { rel: "stylesheet", href: landingStyles },
+  { rel: "icon", type: "image/png", href: "/shipboosticon2.png" },
+  { rel: "apple-touch-icon", href: "/shipboosticon2.png" },
 ];
 
 export const meta: MetaFunction = () => [
