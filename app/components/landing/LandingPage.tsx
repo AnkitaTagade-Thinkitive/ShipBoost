@@ -5,6 +5,7 @@ import { FeatureGrid } from "./FeatureGrid";
 import { Footer } from "./Footer";
 import { GradientBlobs } from "./GradientBlobs";
 import { HowItWorks } from "./HowItWorks";
+import { LandingNav } from "./LandingNav";
 import { Logo } from "./Logo";
 
 /**
@@ -22,16 +23,7 @@ export function LandingPage() {
       <GradientBlobs />
 
       <div className="sb-landing__inner">
-        {/* Nav */}
-        <header className="sb-nav sb-fade-in">
-          <div className="sb-nav__brand">
-            <Logo size={38} glow className="sb-nav__logo" />
-            <span className="sb-nav__name">ShipBoost</span>
-          </div>
-          <a className="sb-btn sb-btn--ghost sb-nav__cta" href="/auth">
-            Open in Shopify
-          </a>
-        </header>
+        <LandingNav />
 
         {/* Hero */}
         <section className="sb-hero">

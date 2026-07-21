@@ -32,7 +32,7 @@ export function FAQSection() {
   const [open, setOpen] = useState<number | null>(0);
 
   return (
-    <section className="sb-section sb-faq" aria-label="Frequently asked questions">
+    <section id="faq" className="sb-section sb-faq" aria-label="Frequently asked questions">
       <div className="sb-section__head">
         <span className="sb-eyebrow">FAQ</span>
         <h2 className="sb-section__title">Frequently Asked Questions</h2>

@@ -6,8 +6,8 @@
 export function GradientBlobs() {
   return (
     <div className="sb-blobs" aria-hidden="true">
-      <span className="sb-blob sb-blob--violet" />
-      <span className="sb-blob sb-blob--cyan" />
+      <span className="sb-blob sb-blob--green" />
+      <span className="sb-blob sb-blob--lime" />
       <span className="sb-blob sb-blob--emerald" />
     </div>
   );

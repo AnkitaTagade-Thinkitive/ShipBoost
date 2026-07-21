@@ -1,21 +1,25 @@
+import { Download, SlidersHorizontal, Puzzle, TrendingUp } from "lucide-react";
+
+const ICON_PROPS = { size: 28, strokeWidth: 1.75 } as const;
+
 const STEPS = [
   {
-    icon: "📦",
+    icon: <Download {...ICON_PROPS} />,
     title: "Install ShipBoost",
     description: "Install the app from the Shopify App Store.",
   },
   {
-    icon: "⚙️",
+    icon: <SlidersHorizontal {...ICON_PROPS} />,
     title: "Configure Your Settings",
     description: "Choose shipping goal, colors, typography and placement.",
   },
   {
-    icon: "🧩",
+    icon: <Puzzle {...ICON_PROPS} />,
     title: "Enable Theme Extension",
     description: "Activate the ShipBoost block inside your Shopify Theme Editor.",
   },
   {
-    icon: "📈",
+    icon: <TrendingUp {...ICON_PROPS} />,
     title: "Increase Revenue",
     description: "Customers unlock free shipping and spend more.",
   },
@@ -28,7 +32,7 @@ const STEPS = [
  */
 export function HowItWorks() {
   return (
-    <section className="sb-section sb-how" aria-label="How it works">
+    <section id="how" className="sb-section sb-how" aria-label="How it works">
       <div className="sb-section__head">
         <span className="sb-eyebrow">Getting started</span>
         <h2 className="sb-section__title">How ShipBoost Works</h2>

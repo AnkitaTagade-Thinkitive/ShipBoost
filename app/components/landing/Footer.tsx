@@ -11,10 +11,15 @@ import { Logo } from "./Logo";
  * rather than a dead redirect. "Terms of Service" has no configured page yet
  * and stays disabled. No placeholder or fake pages are created.
  */
+const SUPPORT_EMAIL = "support@shipboost.app";
+
 const LINKS: { label: string; href?: string }[] = [
   { label: "Privacy Policy", href: isExternalUrl(PRIVACY_URL) ? PRIVACY_URL : undefined },
   { label: "Terms of Service" },
-  { label: "Support", href: isExternalUrl(SUPPORT_URL) ? SUPPORT_URL : undefined },
+  {
+    label: "Support",
+    href: isExternalUrl(SUPPORT_URL) ? SUPPORT_URL : `mailto:${SUPPORT_EMAIL}`,
+  },
   { label: "Documentation", href: isExternalUrl(DOCS_URL) ? DOCS_URL : undefined },
 ];
 
@@ -30,6 +35,10 @@ export function Footer() {
           Beautiful free shipping progress bars and smart recommendations that
           help Shopify merchants grow Average Order Value.
         </p>
+
+        <a className="sb-footer__email" href={`mailto:${SUPPORT_EMAIL}`}>
+          {SUPPORT_EMAIL}
+        </a>
 
         <nav className="sb-footer__links" aria-label="Footer links">
           {LINKS.map((link) =>
@@ -58,7 +67,8 @@ export function Footer() {
       </div>
 
       <div className="sb-footer__bottom">
-        <p>Made with ❤️ for Shopify Merchants</p>
+        <p>© 2026 ShipBoost · Built for Shopify Merchants</p>
+        <p className="sb-footer__love">Made with ❤️ for Shopify Merchants</p>
       </div>
     </footer>
   );
