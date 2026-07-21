@@ -1,5 +1,8 @@
-import type { LoaderFunctionArgs } from "react-router";
+import type { LinksFunction, LoaderFunctionArgs, MetaFunction } from "react-router";
 import { redirect } from "react-router";
+
+import { LandingPage } from "../../components/landing/LandingPage";
+import landingStyles from "./landing.css?url";
 
 /**
  * Root entry point ("/").
@@ -9,9 +12,13 @@ import { redirect } from "react-router";
  * straight to the embedded app at /app, whose `authenticate.admin` loader
  * completes authentication through Shopify's OAuth / token-exchange flow —
  * rendering the Dashboard when authenticated, or bouncing through Shopify OAuth
- * when not. A request with no shop context (only reachable by opening the URL
- * outside Admin) goes to Shopify's OAuth entry at /auth. No login page, no
- * manual shop-domain entry, and nothing is ever rendered here.
+ * when not.
+ *
+ * A request with NO shop context is only reachable by someone opening this URL
+ * directly (outside Admin). Rather than bounce them to Shopify's OAuth entry at
+ * /auth — which renders nothing for a human visitor — we serve a public
+ * marketing landing page. The Shopify authentication flow is untouched: the
+ * landing page's primary CTA simply links to the existing /auth route.
  */
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const url = new URL(request.url);
@@ -20,5 +27,23 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     throw redirect(`/app?${url.searchParams.toString()}`);
   }
 
-  throw redirect("/auth");
+  // Direct visitor with no Shopify context → render the landing page.
+  return null;
 };
+
+export const links: LinksFunction = () => [
+  { rel: "stylesheet", href: landingStyles },
+];
+
+export const meta: MetaFunction = () => [
+  { title: "ShipBoost — Boost Every Cart. Unlock More Revenue." },
+  {
+    name: "description",
+    content:
+      "ShipBoost helps Shopify merchants increase Average Order Value with free shipping progress bars, smart product recommendations, and fully customizable shopping experiences.",
+  },
+];
+
+export default function Index() {
+  return <LandingPage />;
+}

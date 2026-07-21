@@ -3,13 +3,8 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  // Runtime connection — the app uses the pooled (PgBouncer) Neon endpoint,
-  // which is efficient for serverless/many short-lived connections.
-  url      = env("DATABASE_URL")
-  // Migrations use a DIRECT (non-pooled) connection. Prisma Migrate relies on
-  // advisory locks that do not work through Neon's pooled endpoint, so
-  // `prisma migrate deploy/dev` must talk to the direct endpoint.
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
 }
 
@@ -37,49 +32,42 @@ model Session {
 /// The `shop` column (the shop's myshopify.com domain) is unique, so every
 /// shop has exactly one settings record.
 model ShipBoostSetting {
-  id               String   @id @default(cuid())
-  shop             String   @unique
-  enabled          Boolean  @default(true)
-  template         String   @default("modern")
-  goalAmount       String   @default("50.00")
-  currencyCode     String   @default("USD")
-  barColor         String   @default("#2E7D32")
-  backgroundColor  String   @default("#E8F5E9")
-  successColor     String   @default("#1B5E20")
-  remainingMessage String   @default("Spend {{remaining}} more to unlock FREE SHIPPING.")
-  successMessage   String   @default("🎉 Congratulations! You've unlocked FREE SHIPPING.")
-  borderRadius     Int      @default(8)
-  barHeight        Int      @default(12)
-  fontFamily       String   @default("theme")
-  fontSize         Int      @default(12)
-  fontWeight       Int      @default(500)
-  textColor        String   @default("#444444")
-  textAlign        String   @default("center")
-  displayOn        String   @default("all")
-  position         String   @default("below-add-to-cart")
-  enableMobile     Boolean  @default(true)
-  enableDesktop    Boolean  @default(true)
-  widthMode        String   @default("content")
-  customWidth      Int      @default(100)
-  stickyPosition   String   @default("normal")
-
-  // Product Recommendations. Off by default so existing merchants are unchanged
-  // until they opt in.
-  recommendationsEnabled      Boolean @default(false)
-  recommendationSource        String  @default("smart")
-  recommendationMax           Int     @default(3)
-  recommendationShowImage     Boolean @default(true)
-  recommendationShowPrice     Boolean @default(true)
-  recommendationShowButton    Boolean @default(true)
-  recommendationHideAfterGoal Boolean @default(true)
-  recommendationCollectionId  String  @default("")
-  recommendationProductIds    String  @default("")
-  // Add-to-cart button customization. Mode is "theme" (inherit + overrides) or
-  // "custom"; the button style/overrides are stored as a JSON string. Defaults
-  // keep the existing auto-detected theme button (backward compatible).
-  recommendationButtonMode    String  @default("theme")
-  recommendationButton        String  @default("{}")
-
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  id                          String   @id @default(cuid())
+  shop                        String   @unique
+  enabled                     Boolean  @default(true)
+  template                    String   @default("modern")
+  goalAmount                  String   @default("50.00")
+  currencyCode                String   @default("USD")
+  barColor                    String   @default("#2E7D32")
+  backgroundColor             String   @default("#E8F5E9")
+  successColor                String   @default("#1B5E20")
+  remainingMessage            String   @default("Spend {{remaining}} more to unlock FREE SHIPPING.")
+  successMessage              String   @default("🎉 Congratulations! You've unlocked FREE SHIPPING.")
+  borderRadius                Int      @default(8)
+  barHeight                   Int      @default(12)
+  fontFamily                  String   @default("theme")
+  fontSize                    Int      @default(12)
+  fontWeight                  Int      @default(500)
+  textColor                   String   @default("#444444")
+  textAlign                   String   @default("center")
+  displayOn                   String   @default("all")
+  position                    String   @default("below-add-to-cart")
+  enableMobile                Boolean  @default(true)
+  enableDesktop               Boolean  @default(true)
+  createdAt                   DateTime @default(now())
+  updatedAt                   DateTime @updatedAt
+  widthMode                   String   @default("full")
+  customWidth                 Int      @default(100)
+  stickyPosition              String   @default("normal")
+  recommendationsEnabled      Boolean  @default(false)
+  recommendationSource        String   @default("smart")
+  recommendationMax           Int      @default(3)
+  recommendationShowImage     Boolean  @default(true)
+  recommendationShowPrice     Boolean  @default(true)
+  recommendationShowButton    Boolean  @default(true)
+  recommendationHideAfterGoal Boolean  @default(true)
+  recommendationCollectionId  String   @default("")
+  recommendationProductIds    String   @default("")
+  recommendationButtonMode    String   @default("theme")
+  recommendationButton        String   @default("{}")
 }

@@ -1,0 +1,398 @@
+/*
+ * Landing page styles — scoped entirely under `.sb-landing`.
+ *
+ * This stylesheet is loaded ONLY on the "/" route (via the route's `links`
+ * export), so it can never reach the embedded Polaris admin app or any other
+ * route. Every rule is namespaced under `.sb-landing` as a second line of
+ * defence against style leakage.
+ */
+
+.sb-landing {
+  --sb-bg: #05060a;
+  --sb-fg: #f5f7fb;
+  --sb-muted: #9aa3b5;
+  --sb-border: rgba(255, 255, 255, 0.08);
+  --sb-card: rgba(255, 255, 255, 0.04);
+  --sb-violet: #7c5cff;
+  --sb-cyan: #22d3ee;
+  --sb-emerald: #34d399;
+
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
+  background: radial-gradient(
+      1200px 600px at 50% -10%,
+      rgba(124, 92, 255, 0.18),
+      transparent 60%
+    ),
+    var(--sb-bg);
+  color: var(--sb-fg);
+  font-family: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.5;
+}
+
+.sb-landing *,
+.sb-landing *::before,
+.sb-landing *::after {
+  box-sizing: border-box;
+}
+
+.sb-landing__inner {
+  position: relative;
+  z-index: 1;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 28px 24px 64px;
+}
+
+/* ---------- Floating gradient blobs ---------- */
+.sb-blobs {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.sb-blob {
+  position: absolute;
+  width: 46vw;
+  max-width: 620px;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  filter: blur(90px);
+  opacity: 0.55;
+  will-change: transform;
+}
+
+.sb-blob--violet {
+  top: -12%;
+  left: -8%;
+  background: radial-gradient(circle at 30% 30%, #7c5cff, transparent 70%);
+  animation: sb-float 18s ease-in-out infinite;
+}
+
+.sb-blob--cyan {
+  top: 18%;
+  right: -12%;
+  background: radial-gradient(circle at 60% 40%, #22d3ee, transparent 70%);
+  animation: sb-float 22s ease-in-out infinite reverse;
+}
+
+.sb-blob--emerald {
+  bottom: -18%;
+  left: 24%;
+  background: radial-gradient(circle at 50% 50%, #34d399, transparent 70%);
+  animation: sb-float 26s ease-in-out infinite;
+}
+
+@keyframes sb-float {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(4%, 6%) scale(1.08);
+  }
+  66% {
+    transform: translate(-5%, -3%) scale(0.96);
+  }
+}
+
+/* ---------- Nav ---------- */
+.sb-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 72px;
+}
+
+.sb-nav__brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.sb-nav__logo {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  font-size: 18px;
+  background: linear-gradient(135deg, var(--sb-violet), var(--sb-cyan));
+  box-shadow: 0 6px 20px rgba(124, 92, 255, 0.4);
+}
+
+.sb-nav__name {
+  font-size: 18px;
+}
+
+.sb-nav__cta {
+  font-size: 14px;
+}
+
+/* ---------- Hero ---------- */
+.sb-hero {
+  text-align: center;
+  max-width: 760px;
+  margin: 0 auto;
+}
+
+.sb-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--sb-border);
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  font-size: 13px;
+  font-weight: 500;
+  color: #d8dcff;
+}
+
+.sb-hero__title {
+  margin: 26px 0 0;
+  font-size: clamp(2.4rem, 6vw, 4rem);
+  line-height: 1.05;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+.sb-hero__gradient {
+  background: linear-gradient(
+    100deg,
+    var(--sb-violet),
+    var(--sb-cyan) 55%,
+    var(--sb-emerald)
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+.sb-hero__sub {
+  margin: 22px auto 0;
+  max-width: 620px;
+  font-size: clamp(1rem, 2.2vw, 1.15rem);
+  color: var(--sb-muted);
+}
+
+/* ---------- Main card (glassmorphism) ---------- */
+.sb-card {
+  margin: 40px auto 0;
+  max-width: 560px;
+  padding: 36px 32px;
+  border-radius: 24px;
+  border: 1px solid var(--sb-border);
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.07),
+    rgba(255, 255, 255, 0.03)
+  );
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 30px 80px -30px rgba(0, 0, 0, 0.8),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.sb-card__title {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.sb-card__lead {
+  margin: 10px 0 0;
+  font-weight: 500;
+  color: #c7cdda;
+}
+
+.sb-card__text {
+  margin: 12px 0 0;
+  font-size: 0.95rem;
+  color: var(--sb-muted);
+}
+
+.sb-card__actions {
+  margin-top: 28px;
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+
+/* ---------- Buttons ---------- */
+.sb-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 22px;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform 0.18s ease, box-shadow 0.25s ease,
+    background 0.25s ease, border-color 0.25s ease;
+}
+
+.sb-btn--primary {
+  color: #0b0713;
+  background: linear-gradient(135deg, #ffffff, #d9dcff);
+  box-shadow: 0 12px 30px -8px rgba(124, 92, 255, 0.6);
+}
+
+.sb-btn--primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 18px 40px -8px rgba(124, 92, 255, 0.8);
+}
+
+.sb-btn--ghost {
+  color: var(--sb-fg);
+  border: 1px solid var(--sb-border);
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.sb-btn--ghost:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.22);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.sb-btn__arrow {
+  transition: transform 0.2s ease;
+}
+
+.sb-btn--primary:hover .sb-btn__arrow {
+  transform: translateX(4px);
+}
+
+/* ---------- Features ---------- */
+.sb-features {
+  margin-top: 72px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.sb-feature {
+  padding: 28px 24px;
+  border-radius: 20px;
+  border: 1px solid var(--sb-border);
+  background: var(--sb-card);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  transition: transform 0.25s ease, border-color 0.25s ease,
+    box-shadow 0.3s ease, background 0.3s ease;
+}
+
+.sb-feature:hover {
+  transform: translateY(-6px);
+  border-color: rgba(124, 92, 255, 0.45);
+  background: rgba(255, 255, 255, 0.06);
+  box-shadow: 0 24px 60px -24px rgba(124, 92, 255, 0.55);
+}
+
+.sb-feature__icon {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  font-size: 24px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--sb-border);
+}
+
+.sb-feature__title {
+  margin: 18px 0 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.sb-feature__desc {
+  margin: 8px 0 0;
+  font-size: 0.92rem;
+  color: var(--sb-muted);
+}
+
+/* ---------- Footer ---------- */
+.sb-footer {
+  margin-top: 72px;
+  text-align: center;
+  font-size: 0.9rem;
+  color: var(--sb-muted);
+}
+
+.sb-footer p {
+  margin: 0;
+}
+
+/* ---------- Animations ---------- */
+.sb-fade-in {
+  opacity: 0;
+  animation: sb-fade-in 0.8s ease forwards;
+}
+
+.sb-fade-up {
+  opacity: 0;
+  animation: sb-fade-up 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes sb-fade-in {
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes sb-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 860px) {
+  .sb-features {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 520px) {
+  .sb-nav__cta {
+    display: none;
+  }
+  .sb-card {
+    padding: 28px 22px;
+  }
+}
+
+/* ---------- Reduced motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .sb-landing *,
+  .sb-landing *::before,
+  .sb-landing *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+  .sb-fade-in,
+  .sb-fade-up {
+    opacity: 1;
+  }
+}
